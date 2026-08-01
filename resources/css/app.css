@@ -1,3 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-cream text-ink font-sans antialiased;
+    }
+
+    h1, h2, h3, h4 {
+        @apply font-display;
+    }
+}
+
+@layer components {
+    .eyebrow {
+        @apply text-xs font-semibold uppercase tracking-[0.18em] text-gold-dark;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-full bg-ink px-6 py-3
+               text-sm font-semibold text-cream transition hover:bg-gold-dark
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center rounded-full border border-ink/15 bg-transparent px-6 py-3
+               text-sm font-semibold text-ink transition hover:border-ink/40
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream;
+    }
+}

@@ -45,21 +45,21 @@ class User extends Authenticatable
 
     public function isSystemAdmin(): bool
     {
-        return $this->role === UserRole::SystemAdmin->value;
+        return $this->role === UserRole::SystemAdmin;
     }
 
     public function isOwner(): bool
     {
-        return $this->role === UserRole::Owner->value;
+        return $this->role === UserRole::Owner;
     }
 
     public function canManageRooms(): bool
     {
-        return in_array($this->role, UserRole::canManageRooms(), true);
+        return in_array($this->role->value, UserRole::canManageRooms(), true);
     }
 
     public function canManageUsers(): bool
     {
-        return in_array($this->role, UserRole::canManageUsers(), true);
+        return in_array($this->role->value, UserRole::canManageUsers(), true);
     }
 }

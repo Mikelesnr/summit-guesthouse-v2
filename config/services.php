@@ -42,4 +42,8 @@ return [
         'return_url' => env('PAYNOW_RETURN_URL', env('APP_URL') . '/bookings/{reference}/confirmation'),
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
 ];
