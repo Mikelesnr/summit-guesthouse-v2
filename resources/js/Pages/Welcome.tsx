@@ -53,7 +53,7 @@ interface WelcomeProps {
 
 export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
     function goToBooking(search: AvailabilitySearch) {
-        router.get('/book', search);
+        router.get('/book', search as any);
     }
 
     return (

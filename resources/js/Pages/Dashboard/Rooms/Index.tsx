@@ -60,7 +60,7 @@ function RoomRow({ room }: { room: Room }) {
         const next = { ...values, ...patch };
         setValues(next);
         setSaving(true);
-        router.put(`/dashboard/rooms/${room.id}`, next as Record<string, unknown>, {
+        router.put(`/dashboard/rooms/${room.id}`, next as Record<string, any>, {
             preserveScroll: true,
             onFinish: () => setSaving(false),
         });
