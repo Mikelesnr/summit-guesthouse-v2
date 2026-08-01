@@ -25,7 +25,7 @@ WORKDIR /app
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package.json package-lock.json* ./
-RUN npm ci || npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code AND vendor folder so Ziggy imports work cleanly
 COPY . .
