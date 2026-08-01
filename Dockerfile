@@ -1,5 +1,5 @@
 # Stage 1: Install PHP Dependencies with Composer
-FROM php:8.3-cli-alpine AS composer_base
+FROM php:8.4-cli-alpine AS composer_base
 
 RUN apk add --no-cache \
     zip unzip git libpng-dev libjpeg-turbo-dev \
@@ -36,7 +36,7 @@ RUN npm run build
 
 
 # Stage 3: Final Production Image
-FROM php:8.3-fpm-alpine AS backend
+FROM php:8.4-fpm-alpine AS backend
 
 RUN apk add --no-cache \
     nginx curl zip unzip git libpng-dev libjpeg-turbo-dev \
