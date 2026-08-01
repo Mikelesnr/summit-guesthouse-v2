@@ -30,6 +30,7 @@ export interface Room {
     size: number | null;
     max_guests: number;
     quantity: number;
+    available_quantity?: number;
     has_breakfast: boolean;
     pets_allowed: boolean;
     is_featured: boolean;
@@ -41,6 +42,7 @@ export interface Room {
 export interface Booking {
     id: string;
     reference: string;
+    group_reference: string | null;
     room_id: string;
     room?: Room;
     first_name: string;
@@ -50,6 +52,7 @@ export interface Booking {
     check_in: string;
     check_out: string;
     guests: number;
+    party_size: number | null;
     total_price: number | string;
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
     payment_status: 'unpaid' | 'paid' | 'partially_paid' | 'refunded';
@@ -57,10 +60,15 @@ export interface Booking {
     notes: string | null;
 }
 
+export interface CartItem {
+    room: Room;
+    quantity: number;
+}
+
 export interface AvailabilitySearch {
     check_in: string;
     check_out: string;
-    guests: number;
+    party_size: number;
 }
 
 export type ChatRole = 'user' | 'assistant';

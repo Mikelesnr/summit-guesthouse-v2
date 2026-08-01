@@ -1,9 +1,10 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { AvailabilitySearch, Room } from '@/types';
+import { AvailabilitySearch, CartItem } from '@/types';
 
 interface BookingDetailsFormProps {
-    room: Room;
+    items: CartItem[];
     search: AvailabilitySearch;
+    total: number;
 }
 
 interface FormState {
@@ -14,7 +15,7 @@ interface FormState {
     notes: string;
 }
 
-export default function BookingDetailsForm({ room, search }: BookingDetailsFormProps) {
+export default function BookingDetailsForm({ items, search, total }: BookingDetailsFormProps) {
     const [form, setForm] = useState<FormState>({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,6 @@ export default function BookingDetailsForm({ room, search }: BookingDetailsFormP
         1,
         Math.round((new Date(search.check_out).getTime() - new Date(search.check_in).getTime()) / 86400000)
     );
-    const total = (Number(room.price) * nights).toFixed(0);
 
     function update(field: keyof FormState) {
         return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -45,17 +45,18 @@ export default function BookingDetailsForm({ room, search }: BookingDetailsFormP
                     'X-CSRF-TOKEN': csrfToken,
                 },
                 body: JSON.stringify({
-                    room_id: room.id,
                     check_in: search.check_in,
                     check_out: search.check_out,
-                    guests: search.guests,
+                    party_size: search.party_size,
+                    items: items.map((i) => ({ room_id: i.room.id, quantity: i.quantity })),
                     ...form,
                 }),
             });
 
             if (!res.ok) {
                 const data = await res.json().catch(() => null);
-                throw new Error(data?.message ?? 'Could not create booking');
+                const message = data?.errors?.items?.[0] ?? data?.message ?? 'Could not create booking';
+                throw new Error(message);
             }
 
             const data: { redirect_url?: string } = await res.json();
@@ -72,9 +73,14 @@ export default function BookingDetailsForm({ room, search }: BookingDetailsFormP
     return (
         <form onSubmit={submit} className="space-y-5 rounded-2xl border border-line bg-white p-6 shadow-card">
             <div>
-                <p className="font-display text-lg text-ink">{room.name}</p>
-                <p className="text-sm text-ink/60">
-                    {search.check_in} &rarr; {search.check_out} · {nights} night{nights > 1 ? 's' : ''} · ${total} total
+                <p className="font-display text-lg text-ink">Your booking</p>
+                <ul className="mt-2 space-y-1 text-sm text-ink/70">
+                    {items.map((item) => (
+                        <li key={item.room.id}>{item.quantity} &times; {item.room.name}</li>
+                    ))}
+                </ul>
+                <p className="mt-2 text-sm text-ink/60">
+                    {search.check_in} &rarr; {search.check_out} · {nights} night{nights > 1 ? 's' : ''} · ${total.toFixed(0)} total
                 </p>
             </div>
 
@@ -92,6 +98,7 @@ export default function BookingDetailsForm({ room, search }: BookingDetailsFormP
                     value={form.notes}
                     onChange={update('notes')}
                     rows={3}
+                    placeholder="e.g. conference group, arriving late, etc."
                     className="w-full rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
                 />
             </label>
@@ -99,7 +106,7 @@ export default function BookingDetailsForm({ room, search }: BookingDetailsFormP
             {error && <p className="text-sm text-red-600">{error}</p>}
 
             <button type="submit" disabled={submitting} className="btn-primary w-full">
-                {submitting ? 'Redirecting to payment…' : `Pay $${total} with Paynow`}
+                {submitting ? 'Redirecting to payment…' : `Pay $${total.toFixed(0)} with Paynow`}
             </button>
             <p className="text-center text-xs text-ink/40">You&apos;ll be sent to Paynow&apos;s secure checkout to complete payment.</p>
         </form>

@@ -16,17 +16,31 @@ class PaynowService
         $this->paynow = new Paynow($id, $key, $resultUrl, $returnUrl);
     }
 
+    /**
+     * $booking is the "primary" row of the group (or the only row for a
+     * single-room booking). Its total_price is the grand total for the
+     * whole cart — see BookingController::store(). If it belongs to a
+     * group, we itemize every room in the group as its own line so the
+     * Paynow checkout shows the full breakdown rather than one lump sum.
+     */
     public function initiate(Booking $booking): Payment
     {
+        $authEmail = env('PAYNOW_TEST_EMAIL', $booking->email);
         $payment = $this->paynow->createPayment(
             $booking->reference,
-            $booking->email
+            $authEmail
         );
 
-        $payment->add(
-            "{$booking->room->name} room · {$booking->nights} night(s)",
-            (float) $booking->total_price
-        );
+        $lineItems = $booking->group_reference
+            ? Booking::where('group_reference', $booking->group_reference)->with('room')->get()
+            : collect([$booking]);
+
+        foreach ($lineItems as $line) {
+            $payment->add(
+                "{$line->room->name} room · {$line->nights} night(s)",
+                (float) $line->total_price
+            );
+        }
 
         $response = $this->paynow->send($payment);
 
@@ -36,7 +50,7 @@ class PaynowService
             'reference' => $booking->reference,
             'paynow_reference' => $response->pollUrl() ? $this->extractReference($response->pollUrl()) : null,
             'poll_url' => $response->pollUrl(),
-            'amount' => $booking->total_price,
+            'amount' => $lineItems->sum('total_price'),
             'status' => $response->success() ? 'created' : 'failed',
             'raw_response' => (array) $response,
         ]);
@@ -60,7 +74,15 @@ class PaynowService
         ]);
 
         if ($status->paid()) {
-            $payment->booking->update(['payment_status' => 'paid', 'status' => 'confirmed']);
+            $booking = $payment->booking;
+
+            // Cascade to every room in the group, not just the primary row
+            // the payment happens to be attached to.
+            $query = $booking->group_reference
+                ? Booking::where('group_reference', $booking->group_reference)
+                : Booking::whereKey($booking->id);
+
+            $query->update(['payment_status' => 'paid', 'status' => 'confirmed']);
         }
 
         return $newStatus;

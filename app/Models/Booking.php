@@ -13,6 +13,7 @@ class Booking extends Model
 
     protected $fillable = [
         'reference',
+        'group_reference',
         'room_id',
         'first_name',
         'last_name',
@@ -21,6 +22,7 @@ class Booking extends Model
         'check_in',
         'check_out',
         'guests',
+        'party_size',
         'total_price',
         'status',
         'payment_status',

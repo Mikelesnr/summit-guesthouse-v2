@@ -7,7 +7,6 @@ const NAV = [
     { href: '/', label: 'Home' },
     { href: '/rooms', label: 'Rooms' },
     { href: '/book', label: 'Book' },
-    { href: '/location', label: 'Location' },
     { href: '/contact', label: 'Contact' },
 ];
 
@@ -16,8 +15,8 @@ export default function SiteLayout({ children }: PropsWithChildren) {
         <div className="flex min-h-screen flex-col bg-cream">
             <header className="sticky top-0 z-30 border-b border-line/70 bg-cream/90 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-                    <Link href="/" className="font-display text-lg tracking-wide text-ink">
-                        Summit Lodge
+                    <Link href="/" className="flex items-center gap-2">
+                        <img src="/images/brand/logo.png" alt="Summit Lodge" className="h-9 w-auto object-contain" />
                     </Link>
                     <nav className="hidden gap-8 text-sm font-medium text-ink/70 sm:flex">
                         {NAV.map((item) => (
@@ -46,13 +45,24 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                     <div>
                         <p className="eyebrow">Get in touch</p>
                         <ul className="mt-3 space-y-2 text-sm text-ink/70">
-                            <li>Harare, Zimbabwe</li>
+                            <li>687 Baobab Road, Beitbridge, Zimbabwe</li>
                             <li>
-                                <a href="tel:+263773270659" className="hover:text-ink">+263 77 327 0659</a>
+                                <Link href="/location" className="hover:text-ink">Get directions</Link>
                             </li>
                             <li>
-                                <a href="mailto:info@summitguesthouse.org" className="hover:text-ink">
-                                    info@summitguesthouse.org
+                                <a href="tel:+263780652983" className="hover:text-ink">+263 78 065 2983</a>
+                            </li>
+                            <li>
+                                <a href="tel:+263718267984" className="hover:text-ink">+263 71 826 7984</a>
+                            </li>
+                            <li>
+                                <a href="mailto:summitguestlodge@gmail.com" className="hover:text-ink">
+                                    summitguestlodge@gmail.com
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.facebook.com/Summitguestlodge" target="_blank" rel="noopener noreferrer" className="hover:text-ink">
+                                    Facebook
                                 </a>
                             </li>
                         </ul>

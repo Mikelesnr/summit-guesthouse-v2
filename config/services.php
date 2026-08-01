@@ -46,4 +46,15 @@ return [
         'key' => env('GEMINI_API_KEY'),
     ],
 
+    'google_mail' => [
+        'client_id' => env('GOOGLE_MAIL_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_MAIL_CLIENT_SECRET'),
+        'refresh_token' => env('GOOGLE_MAIL_REFRESH_TOKEN'),
+        // The Gmail account these OAuth credentials were authorised
+        // against — Gmail API sends as whoever the token belongs to,
+        // this is just used for the "From" display name/reply-to fallback.
+        'from_email' => env('GOOGLE_MAIL_FROM', 'summitguestlodge@gmail.com'),
+        'from_name' => env('GOOGLE_MAIL_FROM_NAME', 'Summit Lodge'),
+    ],
+
 ];
