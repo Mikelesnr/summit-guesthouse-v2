@@ -20,12 +20,14 @@ const STATUS_COPY: Record<ConfirmationStatus, { title: string; body: string }> =
 };
 
 interface ConfirmationProps {
-    booking?: Booking;
+    bookings: Booking[];
+    total: number;
     status?: ConfirmationStatus;
 }
 
-export default function Confirmation({ booking, status = 'pending' }: ConfirmationProps) {
+export default function Confirmation({ bookings = [], total, status = 'pending' }: ConfirmationProps) {
     const copy = STATUS_COPY[status];
+    const primary = bookings[0];
 
     return (
         <SiteLayout>
@@ -35,14 +37,20 @@ export default function Confirmation({ booking, status = 'pending' }: Confirmati
                 <h1 className="font-display text-3xl text-ink">{copy.title}</h1>
                 <p className="mt-4 text-ink/70">{copy.body}</p>
 
-                {booking && (
+                {primary && (
                     <div className="mt-8 rounded-2xl border border-line bg-white p-6 text-left shadow-card">
                         <p className="eyebrow">Booking reference</p>
-                        <p className="mt-1 font-mono text-sm text-ink">{booking.reference}</p>
-                        <div className="mt-4 space-y-1 text-sm text-ink/70">
-                            <p>{booking.room?.name}</p>
-                            <p>{booking.check_in} &rarr; {booking.check_out}</p>
-                            <p>${booking.total_price}</p>
+                        <p className="mt-1 font-mono text-sm text-ink">{primary.group_reference ?? primary.reference}</p>
+
+                        <ul className="mt-4 space-y-1 text-sm text-ink/70">
+                            {bookings.map((b) => (
+                                <li key={b.id}>{b.room?.name} room</li>
+                            ))}
+                        </ul>
+
+                        <div className="mt-4 space-y-1 border-t border-line pt-4 text-sm text-ink/70">
+                            <p>{primary.check_in} &rarr; {primary.check_out}</p>
+                            <p className="font-display text-lg text-ink">${total}</p>
                         </div>
                     </div>
                 )}

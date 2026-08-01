@@ -20,7 +20,13 @@ export default function Rooms({ rooms = [] }: RoomsProps) {
 
                 <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {rooms.map((room) => (
-                        <RoomCard key={room.id} room={room} onSelect={() => router.get('/book')} />
+                        <RoomCard
+                            key={room.id}
+                            room={room}
+                            viewHref={`/rooms/${room.slug}`}
+                            selectLabel="View room"
+                            onSelect={() => router.get(`/rooms/${room.slug}`)}
+                        />
                     ))}
                 </div>
             </section>

@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? '263773270659';
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? '263780652983';
 
 interface WhatsAppButtonProps {
     message?: string;

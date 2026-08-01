@@ -18,24 +18,24 @@ class ChatbotController extends Controller
 
         $rooms = Room::where('is_active', true)->get(['name', 'type', 'price', 'max_guests', 'has_breakfast']);
 
-        $roomSummary = $rooms->map(fn ($r) => "{$r->name} ({$r->type}, up to {$r->max_guests} guests): \${$r->price}/night"
-            .($r->has_breakfast ? ', breakfast included' : ''))->implode('; ');
+        $roomSummary = $rooms->map(fn($r) => "{$r->name} ({$r->type}, up to {$r->max_guests} guests): \${$r->price}/night"
+            . ($r->has_breakfast ? ', breakfast included' : ''))->implode('; ');
 
         $systemPrompt = 'You are the booking assistant for Summit Lodge, a guesthouse in Zimbabwe. '
-            ."Current rooms and prices: {$roomSummary}. "
-            .'Answer briefly and warmly. If a guest wants to actually book, direct them to use the '
-            .'"Check availability" search on the site, or offer the WhatsApp button for a human. '
-            .'Never invent prices or rooms not listed above. Keep replies under 80 words.';
+            . "Current rooms and prices: {$roomSummary}. "
+            . 'Answer briefly and warmly. If a guest wants to actually book, direct them to use the '
+            . '"Check availability" search on the site, or offer the WhatsApp button for a human. '
+            . 'Never invent prices or rooms not listed above. Keep replies under 80 words.';
 
-        $contents = collect($validated['messages'])->map(fn ($m) => [
+        $contents = collect($validated['messages'])->map(fn($m) => [
             'role' => $m['role'] === 'assistant' ? 'model' : 'user',
             'parts' => [['text' => $m['content']]],
         ])->values()->all();
 
         $response = Http::withHeaders(['Content-Type' => 'application/json'])
             ->post(
-                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='
-                    .config('services.gemini.key'),
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='
+                . config('services.gemini.key'),
                 [
                     'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
                     'contents' => $contents,
@@ -43,7 +43,7 @@ class ChatbotController extends Controller
             );
 
         if ($response->failed()) {
-            report(new \RuntimeException('Gemini request failed: '.$response->body()));
+            report(new \RuntimeException('Gemini request failed: ' . $response->body()));
 
             return response()->json([
                 'reply' => "Sorry, I'm having trouble right now — please use the WhatsApp button and our team will help.",

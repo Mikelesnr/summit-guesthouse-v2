@@ -26,27 +26,42 @@ class PageController extends Controller
         ]);
     }
 
+    public function roomShow(string $slug)
+    {
+        $room = Room::where('slug', $slug)->where('is_active', true)->with('images')->firstOrFail();
+
+        return Inertia::render('Rooms/Show', compact('room'));
+    }
+
     // Booking search page. Accepts optional ?check_in&check_out&guests
     // from the homepage search card so the form is pre-filled, but the
     // actual room list is always fetched client-side via /api/rooms/available.
     public function bookSearch(Request $request)
     {
         return Inertia::render('Booking/Search', [
-            'initialSearch' => $request->only(['check_in', 'check_out', 'guests']) ?: null,
+            'initialSearch' => $request->only(['check_in', 'check_out', 'party_size']) ?: null,
         ]);
     }
 
     public function bookingConfirmation(string $reference)
     {
-        $booking = Booking::with('room')->where('reference', $reference)->firstOrFail();
+        $primary = Booking::with('room')->where('reference', $reference)->firstOrFail();
+
+        $bookings = $primary->group_reference
+            ? Booking::with('room')->where('group_reference', $primary->group_reference)->get()
+            : collect([$primary]);
 
         $status = match (true) {
-            $booking->payment_status === 'paid' => 'paid',
-            $booking->payment_status === 'unpaid' && $booking->created_at->lt(now()->subMinutes(30)) => 'failed',
+            $primary->payment_status === 'paid' => 'paid',
+            $primary->payment_status === 'unpaid' && $primary->created_at->lt(now()->subMinutes(30)) => 'failed',
             default => 'pending',
         };
 
-        return Inertia::render('Booking/Confirmation', compact('booking', 'status'));
+        return Inertia::render('Booking/Confirmation', [
+            'bookings' => $bookings,
+            'total' => $bookings->sum('total_price'),
+            'status' => $status,
+        ]);
     }
 
     public function location()

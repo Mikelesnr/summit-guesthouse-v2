@@ -10,6 +10,7 @@ use Inertia\Inertia;
 // Public site
 Route::get('/', [PageController::class, 'welcome'])->name('home');
 Route::get('/rooms', [PageController::class, 'rooms'])->name('rooms');
+Route::get('/rooms/{slug}', [PageController::class, 'roomShow'])->name('rooms.show');
 Route::get('/book', [PageController::class, 'bookSearch'])->name('book');
 Route::get('/bookings/{reference}/confirmation', [PageController::class, 'bookingConfirmation'])->name('bookings.confirmation');
 Route::get('/location', [PageController::class, 'location'])->name('location');
