@@ -42,9 +42,9 @@ class RoomSeeder extends Seeder
                 'pets_allowed' => false,
                 'is_featured' => true,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a queen-sized bed, '
-                    .'a 50-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
-                    .'meals, self-service tea facilities and air-conditioning.',
-                'images' => ['bed.jpeg', 'fridge.jpeg', 'toilet.jpeg', 'tv.jpeg'],
+                    . 'a 50-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
+                    . 'meals, self-service tea facilities and air-conditioning.',
+                'images' => ['full.jpeg', 'main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
             ],
             [
                 'name' => 'Queen',
@@ -57,9 +57,9 @@ class RoomSeeder extends Seeder
                 'pets_allowed' => false,
                 'is_featured' => false,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a queen-sized bed, '
-                    .'a 50-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
-                    .'meals, self-service tea facilities and air-conditioning.',
-                'images' => ['main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
+                    . 'a 50-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
+                    . 'meals, self-service tea facilities and air-conditioning.',
+                'images' => ['full.jpeg', 'main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
             ],
             [
                 'name' => 'Presidential',
@@ -72,9 +72,9 @@ class RoomSeeder extends Seeder
                 'pets_allowed' => false,
                 'is_featured' => false,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a king-sized bed, '
-                    .'a 60-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
-                    .'meals, self-service tea facilities, two executive seaters and air-conditioning.',
-                'images' => ['main.jpeg', 'bed.jpeg', 'tv.jpeg', 'toilet.jpeg'],
+                    . 'a 60-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
+                    . 'meals, self-service tea facilities, two executive seaters and air-conditioning.',
+                'images' => ['full.jpeg', 'main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
             ],
             [
                 'name' => 'Signature',
@@ -87,9 +87,9 @@ class RoomSeeder extends Seeder
                 'pets_allowed' => false,
                 'is_featured' => true,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a king-sized bed, '
-                    .'a 65-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
-                    .'meals, self-service tea facilities, two executive seaters and air-conditioning.',
-                'images' => ['main.jpeg', 'fridge.jpeg', 'tv.jpeg', 'toilet.jpeg'],
+                    . 'a 65-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
+                    . 'meals, self-service tea facilities, two executive seaters and air-conditioning.',
+                'images' => ['full.jpeg', 'main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
             ],
             [
                 'name' => 'King',
@@ -102,9 +102,9 @@ class RoomSeeder extends Seeder
                 'pets_allowed' => false,
                 'is_featured' => true,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a king-sized bed, '
-                    .'a 60-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
-                    .'meals, self-service tea facilities and air-conditioning.',
-                'images' => ['main.jpeg', 'bed.jpeg', 'tv.jpeg', 'toilet.jpeg'],
+                    . 'a 60-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
+                    . 'meals, self-service tea facilities and air-conditioning.',
+                'images' => ['full.jpeg', 'main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
             ],
             [
                 'name' => 'Monarch',
@@ -117,9 +117,9 @@ class RoomSeeder extends Seeder
                 'pets_allowed' => false,
                 'is_featured' => true,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a king-sized bed, '
-                    .'a 65-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
-                    .'meals, self-service tea facilities, two executive seaters and air-conditioning.',
-                'images' => ['main.jpeg', 'bed.jpeg', 'tv.jpeg', 'toilet.jpeg'],
+                    . 'a 65-inch tv, pressurized hot water, porcelain tiled floors, access room service for all '
+                    . 'meals, self-service tea facilities, two executive seaters and air-conditioning.',
+                'images' => ['full.jpeg', 'main.jpeg', 'bathroom.jpeg', 'tv.jpeg', 'toilet.jpeg'],
             ],
         ];
 
