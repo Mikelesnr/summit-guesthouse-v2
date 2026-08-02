@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Services\PaynowService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Transports\GmailApiTransport;
 use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
@@ -36,5 +38,11 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
+
+        // ⚡ 3. Existing Custom Mailer Extension (Preserved intact)
+        Mail::extend('gmail_api', function (array $config) {
+            return new GmailApiTransport();
+        });
+
     }
 }

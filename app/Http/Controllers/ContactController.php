@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GmailMailerService;
+use App\Mail\ContactAcknowledgement;
+use App\Mail\ContactNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class ContactController extends Controller
 {
-    public function store(Request $request, GmailMailerService $mailer)
+    /**
+     * Store a newly created contact message.
+     */
+    public function store(Request $request)
     {
+        // 1. Validate the incoming request data
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email'],
@@ -16,26 +23,26 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        $body = collect([
-            "<p><strong>From:</strong> {$validated['name']} ({$validated['email']})</p>",
-            '<p>'.nl2br(e($validated['message'])).'</p>',
-        ])->implode('');
-
         try {
-            $mailer->send(
-                to: config('services.google_mail.from_email'),
-                subject: "[Website] {$validated['subject']}",
-                htmlBody: $body,
-                replyTo: $validated['email'],
-            );
-        } catch (\Throwable $e) {
-            report($e);
+            // Send thank-you email to sender
+            Mail::to($validated['email'])->send(new ContactAcknowledgement($validated));
+
+            // Send notification email to you
+            Mail::to('micky.mpd@gmail.com')->send(new ContactNotification($validated));
+        } catch (\Exception $e) {
+            Log::error('❌ Email sending failed: ' . $e->getMessage());
+            Log::debug('📦 Payload:', $validated);
 
             return response()->json([
-                'message' => "Sorry, that didn't send — please try WhatsApp instead.",
+                'success' => false,
+                'message' => 'Email failed to send. Please try again later.',
             ], 500);
         }
 
-        return response()->json(['message' => 'Message sent — we\'ll get back to you soon.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Thanks for reaching out! I’ll get back to you soon.',
+        ]);
+
     }
 }

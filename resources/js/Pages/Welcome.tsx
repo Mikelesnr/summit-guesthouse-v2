@@ -1,16 +1,32 @@
-import { Head, router } from '@inertiajs/react';
-import { Coffee, Satellite, Fan, Wifi } from 'lucide-react';
-import SiteLayout from '@/Layouts/SiteLayout';
-import ContourLines from '@/Components/ContourLines';
 import AvailabilitySearchForm from '@/Components/AvailabilitySearchForm';
+import ContourLines from '@/Components/ContourLines';
 import RoomCard from '@/Components/RoomCard';
+import SiteLayout from '@/Layouts/SiteLayout';
 import { AvailabilitySearch, Room } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { Coffee, Fan, Satellite, Wifi } from 'lucide-react';
 
 const SERVICES = [
-    { icon: Coffee, title: 'Breakfast', info: 'Dining services for all meals, with room service as an option.' },
-    { icon: Satellite, title: 'DStv', info: 'Full bouquet DStv, every channel available for your viewing pleasure.' },
-    { icon: Fan, title: 'Air conditioning', info: 'Every room is air-conditioned to keep things comfortable.' },
-    { icon: Wifi, title: 'Wi-Fi', info: 'High-speed fibre Wi-Fi in every room, for work or downtime.' },
+    {
+        icon: Coffee,
+        title: 'Breakfast',
+        info: 'Dining services for all meals, with room service as an option.',
+    },
+    {
+        icon: Satellite,
+        title: 'DStv',
+        info: 'Full bouquet DStv, every channel available for your viewing pleasure.',
+    },
+    {
+        icon: Fan,
+        title: 'Air conditioning',
+        info: 'Every room is air-conditioned to keep things comfortable.',
+    },
+    {
+        icon: Wifi,
+        title: 'Wi-Fi',
+        info: 'High-speed fibre Wi-Fi in every room, for work or downtime.',
+    },
 ];
 
 const AMENITY_PHOTOS = [
@@ -62,16 +78,34 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
 
             {/* Hero */}
             <section className="relative overflow-hidden bg-ink text-cream">
-                <ContourLines className="pointer-events-none absolute -right-24 -top-16 h-[420px] w-[600px] text-gold" opacity={0.22} />
-                <div className="mx-auto max-w-6xl px-6 pb-28 pt-20 sm:pt-28">
-                    <p className="eyebrow text-gold-light">Beitbridge, Zimbabwe</p>
-                    <h1 className="mt-4 max-w-xl font-display text-4xl leading-tight sm:text-5xl">
-                        A quiet place at the top of your trip.
-                    </h1>
-                    <p className="mt-5 max-w-md text-cream/70">
-                        Deluxe rooms starting at $50 — comfortable, close to the border, and run by people
-                        who actually want you to enjoy your stay.
-                    </p>
+                <ContourLines
+                    className="pointer-events-none absolute -right-24 -top-16 h-[420px] w-[600px] text-gold"
+                    opacity={0.22}
+                />
+                <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-6 pb-28 pt-20 sm:pt-28 lg:grid-cols-2 lg:gap-16">
+                    <div>
+                        <p className="eyebrow text-gold-light">
+                            Beitbridge, Zimbabwe
+                        </p>
+                        <h1 className="mt-4 font-display text-4xl leading-tight sm:text-5xl">
+                            A quiet place at the top of your trip.
+                        </h1>
+                        <p className="mt-5 max-w-md text-cream/70">
+                            Deluxe rooms starting at $50 — comfortable, close to
+                            the border, and run by people who actually want you
+                            to enjoy your stay.
+                        </p>
+                    </div>
+
+                    <div className="relative">
+                        <div className="aspect-[4/3] overflow-hidden rounded-2xl shadow-lift">
+                            <img
+                                src="/images/home-b.jpeg"
+                                alt="Summit Lodge guesthouse"
+                                className="h-full w-full object-cover"
+                            />
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -83,13 +117,20 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
             {/* Services */}
             <section className="mx-auto max-w-6xl px-6 py-20">
                 <p className="eyebrow">Services</p>
-                <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">Every stay includes</h2>
+                <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">
+                    Every stay includes
+                </h2>
 
                 <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     {SERVICES.map((s) => (
                         <div key={s.title}>
-                            <s.icon className="h-6 w-6 text-gold-dark" strokeWidth={1.5} />
-                            <p className="mt-3 font-display text-lg text-ink">{s.title}</p>
+                            <s.icon
+                                className="h-6 w-6 text-gold-dark"
+                                strokeWidth={1.5}
+                            />
+                            <p className="mt-3 font-display text-lg text-ink">
+                                {s.title}
+                            </p>
                             <p className="mt-1 text-sm text-ink/60">{s.info}</p>
                         </div>
                     ))}
@@ -100,11 +141,16 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
             <section className="bg-cream-deep py-20">
                 <div className="mx-auto max-w-6xl px-6">
                     <p className="eyebrow">Rooms</p>
-                    <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">Featured rooms</h2>
+                    <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">
+                        Featured rooms
+                    </h2>
 
                     <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {featuredRooms.length === 0 && (
-                            <p className="text-sm text-ink/50">Rooms will appear here once added in the dashboard.</p>
+                            <p className="text-sm text-ink/50">
+                                Rooms will appear here once added in the
+                                dashboard.
+                            </p>
                         )}
                         {featuredRooms.map((room) => (
                             <RoomCard
@@ -112,7 +158,9 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
                                 room={room}
                                 viewHref={`/rooms/${room.slug}`}
                                 selectLabel="View room"
-                                onSelect={() => router.get(`/rooms/${room.slug}`)}
+                                onSelect={() =>
+                                    router.get(`/rooms/${room.slug}`)
+                                }
                             />
                         ))}
                     </div>
@@ -121,13 +169,21 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
 
             {/* Book a room CTA */}
             <section className="relative overflow-hidden bg-ink py-20 text-center text-cream">
-                <ContourLines className="pointer-events-none absolute -left-24 -bottom-16 h-[380px] w-[540px] text-gold" opacity={0.18} />
+                <ContourLines
+                    className="pointer-events-none absolute -bottom-16 -left-24 h-[380px] w-[540px] text-gold"
+                    opacity={0.18}
+                />
                 <div className="relative mx-auto max-w-2xl px-6">
-                    <h2 className="font-display text-2xl sm:text-3xl">Book a room</h2>
+                    <h2 className="font-display text-2xl sm:text-3xl">
+                        Book a room
+                    </h2>
                     <p className="mt-3 text-cream/70">
                         Plan an unforgettable experience at Summit Lodge today.
                     </p>
-                    <button onClick={() => router.get('/book')} className="btn-primary mt-6">
+                    <button
+                        onClick={() => router.get('/book')}
+                        className="btn-primary mt-6"
+                    >
                         Book
                     </button>
                 </div>
@@ -136,12 +192,21 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
             {/* Amenities gallery */}
             <section className="mx-auto max-w-6xl px-6 py-20">
                 <p className="eyebrow">Amenities</p>
-                <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">Around the guesthouse</h2>
+                <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">
+                    Around the guesthouse
+                </h2>
 
                 <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {AMENITY_PHOTOS.map((photo) => (
-                        <div key={photo.src} className="aspect-square overflow-hidden rounded-xl bg-cream-deep">
-                            <img src={photo.src} alt={photo.alt} className="h-full w-full object-cover" />
+                        <div
+                            key={photo.src}
+                            className="aspect-square overflow-hidden rounded-xl bg-cream-deep"
+                        >
+                            <img
+                                src={photo.src}
+                                alt={photo.alt}
+                                className="h-full w-full object-cover"
+                            />
                         </div>
                     ))}
                 </div>
@@ -157,18 +222,29 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
 
                     <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {TESTIMONIALS.map((t) => (
-                            <div key={t.name} className="rounded-2xl border border-line bg-white p-6 shadow-card">
+                            <div
+                                key={t.name}
+                                className="rounded-2xl border border-line bg-white p-6 shadow-card"
+                            >
                                 <div className="flex items-center gap-3">
                                     {t.avatar ? (
-                                        <img src={t.avatar} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
+                                        <img
+                                            src={t.avatar}
+                                            alt={t.name}
+                                            className="h-10 w-10 rounded-full object-cover"
+                                        />
                                     ) : (
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-light font-display text-sm text-ink">
                                             {t.name[0]}
                                         </div>
                                     )}
-                                    <p className="font-display text-ink">{t.name}</p>
+                                    <p className="font-display text-ink">
+                                        {t.name}
+                                    </p>
                                 </div>
-                                <p className="mt-4 text-sm text-ink/70">{t.quote}</p>
+                                <p className="mt-4 text-sm text-ink/70">
+                                    {t.quote}
+                                </p>
                             </div>
                         ))}
                     </div>
