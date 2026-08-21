@@ -19,28 +19,28 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = env('SYSTEM_ADMIN_EMAIL');
-        $password = env('SYSTEM_ADMIN_PASSWORD');
+        // 1. Provision Admin Core Security Account First
+        // Email and password come from .env only (ADMIN_EMAIL / ADMIN_PASSWORD) —
+        // no hardcoded fallback, so this fails loudly instead of silently
+        // seeding a guessable account if the env vars are missing.
+        $email = config('services.admin.email');
+        $password = config('services.admin.password');
 
-        if (! $email || ! $password) {
-            $this->command->warn(
-                'Skipped AdminUserSeeder: set SYSTEM_ADMIN_EMAIL and SYSTEM_ADMIN_PASSWORD in .env first.'
+        if (empty($email) || empty($password)) {
+            throw new \RuntimeException(
+                'ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env before seeding the admin account.'
             );
-
-            return;
         }
 
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => $email],
             [
-                'name' => env('SYSTEM_ADMIN_NAME', 'System Admin'),
+                'name' => config('services.admin.name', 'System Administrator'),
                 'password' => Hash::make($password),
-                'role' => UserRole::SystemAdmin->value,
+                'role' => UserRole::SystemAdmin,
                 'is_active' => true,
                 'email_verified_at' => now(),
             ]
         );
-
-        $this->command->info("System admin seeded: {$email}");
     }
 }
