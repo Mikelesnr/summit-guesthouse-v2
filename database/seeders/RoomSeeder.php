@@ -98,7 +98,7 @@ class RoomSeeder extends Seeder
                 'size' => 400,
                 'max_guests' => 1,
                 'quantity' => 5, // placeholder — set your real per-room-type counts here
-                'has_breakfast' => true,
+                'has_breakfast' => false,
                 'pets_allowed' => false,
                 'is_featured' => true,
                 'description' => 'The room comes with a full Dstv package, high speed Wi-Fi, a king-sized bed, '
