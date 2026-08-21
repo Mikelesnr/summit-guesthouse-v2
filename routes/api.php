@@ -14,10 +14,10 @@ Route::post('/contact', [ContactController::class, 'store']);
 
 // Paynow calls this directly — the `api` middleware group is stateless
 // (no CSRF, no session), which is what a server-to-server callback needs.
-Route::post('/payments/paynow/{payment}/callback', [PaynowCallbackController::class, 'callback'])
+Route::match(['get', 'post'], '/payments/paynow/{payment}/callback', [PaynowCallbackController::class, 'callback'])
     ->name('paynow.callback');
 Route::get('/payments/paynow/{payment}/status', [PaynowCallbackController::class, 'status'])
     ->name('paynow.status');
 
 
-Route::post('/payments/paynow/callback', [PaynowCallbackController::class, 'handleGenericCallback']);
+// Route::post('/payments/paynow/callback', [PaynowCallbackController::class, 'handleGenericCallback']);
