@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => 'gmail_api',
+    'default' => env('MAIL_MAILER', 'google_api'),
 
     /*
     |--------------------------------------------------------------------------
@@ -96,8 +96,9 @@ return [
             ],
             'retry_after' => 60,
         ],
-        'gmail_api' => [
-            'transport' => 'gmail_api',
+
+        'google_api' => [
+            'transport' => 'google_api',
         ],
 
 
