@@ -1,4 +1,4 @@
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { ChatMessage } from '@/types';
 
 const GREETING = "Hi, I'm the Summit Lodge assistant. Ask me about room prices, availability for your dates, or how booking works — or tap the WhatsApp button if you'd rather chat with our team directly.";
@@ -8,7 +8,25 @@ export default function ChatbotWidget() {
     const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: GREETING }]);
     const [input, setInput] = useState('');
     const [sending, setSending] = useState(false);
+    
     const listRef = useRef<HTMLDivElement>(null);
+    const widgetRef = useRef<HTMLDivElement>(null);
+
+    // Close the widget if a click occurs outside of it
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (widgetRef.current && !widgetRef.current.contains(event.target as Node)) {
+                setOpen(false);
+            }
+        }
+
+        if (open) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [open]);
 
     async function send(e: FormEvent) {
         e.preventDefault();
@@ -37,7 +55,7 @@ export default function ChatbotWidget() {
     }
 
     return (
-        <div className="fixed bottom-6 left-6 z-40">
+        <div ref={widgetRef} className="fixed bottom-6 left-6 z-40">
             {open && (
                 <div className="mb-3 flex h-[28rem] w-80 flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-lift">
                     <div className="flex items-center justify-between bg-ink px-4 py-3">
@@ -82,8 +100,9 @@ export default function ChatbotWidget() {
             <button
                 onClick={() => setOpen((o) => !o)}
                 aria-label={open ? 'Close chat assistant' : 'Open chat assistant'}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-cream shadow-lift
-                           transition hover:bg-gold-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+                style={{ backgroundColor: 'rgb(175, 154, 125)' }}
+                className="flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lift
+                        transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
             >
                 {open ? (
                     <span className="text-2xl leading-none">&times;</span>
