@@ -58,12 +58,17 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                         })}
                     </nav>
 
-                    <Link
-                        href="/book"
-                        className="btn-primary hidden sm:inline-flex"
-                    >
-                        Check availability
-                    </Link>
+                    <div className="hidden items-center gap-4 sm:flex">
+                        <Link
+                            href="/login"
+                            className="text-sm font-medium text-ink/50 transition hover:text-ink"
+                        >
+                            Staff portal
+                        </Link>
+                        <Link href="/book" className="btn-primary">
+                            Check availability
+                        </Link>
+                    </div>
 
                     {/* Mobile menu toggle */}
                     <button
@@ -111,6 +116,13 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                             className="btn-primary mt-4 justify-center"
                         >
                             Check availability
+                        </Link>
+                        <Link
+                            href="/login"
+                            onClick={() => setOpen(false)}
+                            className="mt-3 text-center text-sm text-ink/50 hover:text-ink"
+                        >
+                            Staff portal
                         </Link>
                     </nav>
                 </div>

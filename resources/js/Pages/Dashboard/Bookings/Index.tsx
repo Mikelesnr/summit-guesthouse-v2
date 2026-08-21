@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Booking } from '@/types';
 
@@ -21,7 +21,12 @@ export default function Index({ bookings = [] }: BookingsIndexProps) {
     return (
         <DashboardLayout>
             <Head title="Bookings" />
-            <h1 className="font-display text-2xl text-ink">Bookings</h1>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <h1 className="font-display text-2xl text-ink">Bookings</h1>
+                <Link href="/dashboard/bookings/create" className="btn-primary">
+                    New walk-in booking
+                </Link>
+            </div>
 
             <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-white shadow-card">
                 <table className="w-full text-sm">
@@ -47,6 +52,7 @@ export default function Index({ bookings = [] }: BookingsIndexProps) {
                                     <span className={`rounded-full px-2 py-1 text-xs ${b.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-cream-deep text-ink/50'}`}>
                                         {b.payment_status}
                                     </span>
+                                    {b.payment_method && <p className="mt-1 text-xs capitalize text-ink/40">{b.payment_method}</p>}
                                 </td>
                                 <td className="px-4 py-3">
                                     <select

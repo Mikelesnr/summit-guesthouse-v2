@@ -62,4 +62,10 @@ class User extends Authenticatable
     {
         return in_array($this->role->value, UserRole::canManageUsers(), true);
     }
+
+    /** @return array<int, string> */
+    public function visibleRoles(): array
+    {
+        return UserRole::visibleTo($this->role);
+    }
 }

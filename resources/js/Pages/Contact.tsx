@@ -2,47 +2,31 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import SiteLayout from '@/Layouts/SiteLayout';
 
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? '263780652983';
+
 interface FormState {
     name: string;
-    email: string;
-    subject: string;
     message: string;
 }
 
-const EMPTY: FormState = { name: '', email: '', subject: '', message: '' };
+const EMPTY: FormState = { name: '', message: '' };
 
 export default function Contact() {
     const [form, setForm] = useState<FormState>(EMPTY);
-    const [submitting, setSubmitting] = useState(false);
-    const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
     function update(field: keyof FormState) {
         return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
             setForm((f) => ({ ...f, [field]: e.target.value }));
     }
 
-    async function submit(e: FormEvent) {
+    function submit(e: FormEvent) {
         e.preventDefault();
-        setSubmitting(true);
-        setResult(null);
 
-        try {
-            const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+        const text = `Hi, I'm ${form.name}.\n\n${form.message}`;
+        const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 
-            const res = await fetch('/api/contact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify(form),
-            });
-            const data: { message: string } = await res.json();
-
-            setResult({ ok: res.ok, message: data.message });
-            if (res.ok) setForm(EMPTY);
-        } catch {
-            setResult({ ok: false, message: "Sorry, that didn't send — please try WhatsApp instead." });
-        } finally {
-            setSubmitting(false);
-        }
+        window.open(href, '_blank', 'noopener,noreferrer');
+        setForm(EMPTY);
     }
 
     return (
@@ -52,8 +36,8 @@ export default function Contact() {
                 <p className="eyebrow">Contact</p>
                 <h1 className="mt-2 font-display text-3xl text-ink">Talk to us directly</h1>
                 <p className="mt-4 max-w-lg text-sm text-ink/70">
-                    Most guests reach us fastest on WhatsApp — tap the button in the corner any time. Prefer to
-                    write it out? Use the form below.
+                    Everyone here reaches us fastest on WhatsApp. Fill this in and we&apos;ll open a chat with your
+                    message already typed out — or tap the floating WhatsApp button any time.
                 </p>
 
                 <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
@@ -69,44 +53,23 @@ export default function Contact() {
                         </label>
 
                         <label className="block">
-                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Email address</span>
-                            <input
-                                type="email"
-                                required
-                                value={form.email}
-                                onChange={update('email')}
-                                className="w-full rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
-                            />
-                        </label>
-
-                        <label className="block">
-                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Subject</span>
-                            <input
-                                required
-                                value={form.subject}
-                                onChange={update('subject')}
-                                className="w-full rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
-                            />
-                        </label>
-
-                        <label className="block">
                             <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Message</span>
                             <textarea
                                 required
-                                rows={5}
+                                rows={6}
+                                placeholder="What can we help with?"
                                 value={form.message}
                                 onChange={update('message')}
                                 className="w-full resize-none rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
                             />
                         </label>
 
-                        {result && (
-                            <p className={`text-sm ${result.ok ? 'text-green-700' : 'text-red-600'}`}>{result.message}</p>
-                        )}
-
-                        <button type="submit" disabled={submitting} className="btn-primary w-full">
-                            {submitting ? 'Sending…' : 'Send message'}
+                        <button type="submit" className="btn-primary w-full">
+                            Continue on WhatsApp
                         </button>
+                        <p className="text-center text-xs text-ink/40">
+                            Opens WhatsApp with your message ready to send — nothing is sent until you do.
+                        </p>
                     </form>
 
                     <div>
