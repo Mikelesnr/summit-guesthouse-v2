@@ -20,4 +20,4 @@ Route::get('/payments/paynow/{payment}/status', [PaynowCallbackController::class
     ->name('paynow.status');
 
 
-// Route::post('/payments/paynow/callback', [PaynowCallbackController::class, 'handleGenericCallback']);
+Route::match(['get', 'post'], '/payments/paynow/callback', [PaynowCallbackController::class, 'handleGenericCallback']);
