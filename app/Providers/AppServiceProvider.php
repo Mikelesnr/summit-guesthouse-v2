@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Services\PaynowService;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\Transports\GmailApiTransport;
+use App\Mail\Transport\GoogleApiTransport;
 use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,9 +40,12 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // ⚡ 3. Existing Custom Mailer Extension (Preserved intact)
-        Mail::extend('gmail_api', function (array $config) {
-            return new GmailApiTransport();
+        Mail::extend('google_api', function (array $config) {
+            return new GoogleApiTransport(
+                config('services.google.client_id') ?? '',
+                config('services.google.client_secret') ?? '',
+                config('services.google.refresh_token') ?? ''
+            );
         });
-
     }
 }

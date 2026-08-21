@@ -4,8 +4,13 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot, hydrateRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+type ImportMetaEnv = {
+    readonly VITE_APP_NAME?: string;
+};
+
+const appName = (import.meta.env as ImportMetaEnv).VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -24,5 +29,16 @@ createInertiaApp({
     },
     progress: {
         color: '#4B5563',
+    },
+});
+
+const updateSW = registerSW({
+    onNeedRefresh() {
+        if (confirm('New content available. Reload?')) {
+            updateSW(true);
+        }
+    },
+    onOfflineReady() {
+        console.log('App ready to work offline');
     },
 });

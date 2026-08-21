@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Dashboard\BookingManagementController;
 use App\Http\Controllers\Dashboard\RoomManagementController;
+use App\Http\Controllers\Dashboard\UserManagementController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -24,9 +25,10 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
 
     Route::middleware('role:manager,owner,system_admin')->group(function () {
         Route::resource('rooms', RoomManagementController::class)->except(['show']);
+        Route::resource('users', UserManagementController::class)->except(['show']);
     });
 
-    Route::resource('bookings', BookingManagementController::class)->only(['index', 'update']);
+    Route::resource('bookings', BookingManagementController::class)->only(['index', 'create', 'store', 'update']);
 });
 
 // Account settings (kept from Breeze, useful for staff to manage their own login)
