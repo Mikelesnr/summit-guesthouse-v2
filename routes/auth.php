@@ -13,8 +13,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     // Public self-registration disabled: staff accounts are created by an
-    // owner/system_admin, not self-signed-up (see UserRole::canManageUsers()).
-    // RegisteredUserController is left in place if you ever want it back.
+    // owner/system_admin/manager, not self-signed-up (see UserRole::canManageUsers()).
+    // Route + RegisteredUserController + the Register.tsx page are all left
+    // in place (just commented out here), in case we want guest/regular
+    // customer self-registration in a future upgrade — uncomment below to
+    // bring it back rather than rebuilding it.
     // Route::get('register', [RegisteredUserController::class, 'create'])
     //     ->name('register');
     // Route::post('register', [RegisteredUserController::class, 'store']);

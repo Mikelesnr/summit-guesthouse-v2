@@ -1,7 +1,7 @@
 import { FormEvent, useRef, useState } from 'react';
 import { ChatMessage } from '@/types';
 
-const GREETING = "Hi, I'm the Summit Lodge assistant. Ask me about rooms, prices, or how to book — or tap the WhatsApp button if you'd rather chat with our team directly.";
+const GREETING = "Hi, I'm the Summit Lodge assistant. Ask me about room prices, availability for your dates, or how booking works — or tap the WhatsApp button if you'd rather chat with our team directly.";
 
 export default function ChatbotWidget() {
     const [open, setOpen] = useState(false);
