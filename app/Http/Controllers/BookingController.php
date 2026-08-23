@@ -15,13 +15,6 @@ use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
-    /**
-     * Books a whole cart of rooms in one checkout — a conference party of
-     * 11 guests might send items like
-     *   [{room_id: queen, quantity: 3}, {room_id: signature, quantity: 2}]
-     * Every room is still capped at 2 guests each; the party's total size
-     * is just informational (`party_size`), not a per-room capacity check.
-     */
     public function store(Request $request, PaynowService $paynow)
     {
         Log::info('Booking Request Payload:', $request->all());
@@ -81,15 +74,12 @@ class BookingController extends Controller
             return $created;
         });
 
-        // The first row becomes the "primary" — it's what Paynow's payment
-        // record attaches to, and its total_price is bumped to the grand
-        // total so the checkout charges for the whole cart in one go.
+        // The first booking serves as the anchor record for Paynow
         $primary = $bookings->first();
-        $primary->update(['total_price' => $bookings->sum('total_price')]);
 
+        // Initiate payment (PaynowService sums all $lineItems automatically)
         $payment = $paynow->initiate($primary->fresh('room'));
 
-        // FIX: Convert the standard collection to an Eloquent Collection so load() works
         $eloquentBookings = Collection::make($bookings)->load('room');
 
         return response()->json([
