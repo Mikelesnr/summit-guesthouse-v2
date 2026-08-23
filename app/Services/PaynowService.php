@@ -4,85 +4,116 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Paynow\Payments\Paynow;
 
 class PaynowService
 {
     private Paynow $paynow;
+    private bool $isSandbox;
+    private ?string $testEmail;
 
-    // Inject configuration via constructor
-    public function __construct(string $id, string $key, string $resultUrl, string $returnUrl)
+    public function __construct()
     {
-        $this->paynow = new Paynow($id, $key, $resultUrl, $returnUrl);
+        $id = config('services.paynow.integration_id');
+        $key = config('services.paynow.integration_key');
+
+        $this->isSandbox = (bool) config('services.paynow.sandbox', false);
+        $this->testEmail = config('services.paynow.test_email');
+
+        // Safe runtime fallbacks using url() to avoid UrlGenerator exceptions during config:cache
+        $resultUrl = config('services.paynow.result_url') ?? url('/api/payments/paynow/callback');
+        $returnUrl = config('services.paynow.return_url') ?? url('/payments/paynow/return');
+
+        $this->paynow = new Paynow($id, $key, $returnUrl, $resultUrl);
     }
 
-    /**
-     * $booking is the "primary" row of the group (or the only row for a
-     * single-room booking). Its total_price is the grand total for the
-     * whole cart — see BookingController::store(). If it belongs to a
-     * group, we itemize every room in the group as its own line so the
-     * Paynow checkout shows the full breakdown rather than one lump sum.
-     */
     public function initiate(Booking $booking): Payment
     {
-        $authEmail = env('PAYNOW_TEST_EMAIL', $booking->email);
-        $payment = $this->paynow->createPayment(
-            $booking->reference,
-            $authEmail
-        );
-
+        // 1. Fetch all bookings in the group if multi-room, or fallback to single
         $lineItems = $booking->group_reference
             ? Booking::where('group_reference', $booking->group_reference)->with('room')->get()
             : collect([$booking]);
 
+        // 2. Calculate true combined total across all booked rooms
+        $totalGroupAmount = $lineItems->sum('total_price');
+
+        // 3. Create Payment record tied to primary booking with full group total
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'provider'   => 'paynow',
+            'reference'  => 'BK-' . ($booking->group_reference ?? $booking->reference) . '-' . time(),
+            'amount'     => $totalGroupAmount,
+            'status'     => 'pending',
+        ]);
+
+        // 4. Set callback and return routes with payment parameter for status resolution
+        $this->paynow->setResultUrl(route('paynow.callback', ['payment' => $payment->id]));
+        $this->paynow->setReturnUrl(route('paynow.return', ['payment' => $payment->id]));
+
+        // Check sandbox mode cleanly via class properties
+        $authEmail = ($this->isSandbox && $this->testEmail)
+            ? $this->testEmail
+            : $booking->email;
+
+        $paynowPayment = $this->paynow->createPayment(
+            $payment->reference,
+            $authEmail
+        );
+
+        // 5. Add line items to Paynow payload with calculated night counts
         foreach ($lineItems as $line) {
-            $payment->add(
-                "{$line->room->name} room · {$line->nights} night(s)",
+            $nights = Carbon::parse($line->check_in)->diffInDays(Carbon::parse($line->check_out));
+
+            $paynowPayment->add(
+                "{$line->room->name} room · {$nights} night(s)",
                 (float) $line->total_price
             );
         }
 
-        $response = $this->paynow->send($payment);
+        $response = $this->paynow->send($paynowPayment);
 
-        $record = Payment::create([
-            'booking_id' => $booking->id,
-            'provider' => 'paynow',
-            'reference' => $booking->reference,
+        $payment->update([
             'paynow_reference' => $response->pollUrl() ? $this->extractReference($response->pollUrl()) : null,
-            'poll_url' => $response->pollUrl(),
-            'amount' => $lineItems->sum('total_price'),
-            'status' => $response->success() ? 'created' : 'failed',
-            'raw_response' => (array) $response,
+            'poll_url'         => $response->pollUrl(),
+            'status'           => $response->success() ? 'created' : 'failed',
+            'raw_response'     => (array) $response,
         ]);
 
         if ($response->success()) {
-            $record->redirect_url = $response->redirectUrl(); // not persisted, just for the controller to use
+            $payment->redirect_url = $response->redirectUrl();
         }
 
-        return $record;
+        return $payment;
     }
 
     public function checkStatus(Payment $payment): string
     {
-        $status = $this->paynow->pollTransaction($payment->poll_url);
+        if (!$payment->poll_url) {
+            return $payment->status;
+        }
 
+        $status = $this->paynow->pollTransaction($payment->poll_url);
         $newStatus = $status->paid() ? 'paid' : strtolower($status->status());
 
         $payment->update([
-            'status' => $newStatus,
+            'status'       => $newStatus,
             'raw_response' => (array) $status,
         ]);
 
         if ($status->paid()) {
             $booking = $payment->booking;
 
-            // Cascade to every room in the group, not just the primary row
-            // the payment happens to be attached to.
+            // Mark ALL rooms in the group as paid, confirmed, & set payment_method to paynow
             $query = $booking->group_reference
                 ? Booking::where('group_reference', $booking->group_reference)
                 : Booking::whereKey($booking->id);
 
-            $query->update(['payment_status' => 'paid', 'status' => 'confirmed']);
+            $query->update([
+                'payment_status' => 'paid',
+                'status'         => 'confirmed',
+                'payment_method' => 'paynow',
+            ]);
         }
 
         return $newStatus;

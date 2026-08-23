@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\BookingManagementController;
 use App\Http\Controllers\Dashboard\RoomManagementController;
 use App\Http\Controllers\Dashboard\UserManagementController;
+use App\Http\Controllers\PaynowCallbackController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +22,7 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 // NOT linked from the guest nav (see resources/js/Layouts/SiteLayout.tsx),
 // staff just know the URL.
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
-    Route::get('/', fn () => Inertia::render('Dashboard/Index'))->name('index');
+    Route::get('/', fn() => Inertia::render('Dashboard/Index'))->name('index');
 
     Route::middleware('role:manager,owner,system_admin')->group(function () {
         Route::resource('rooms', RoomManagementController::class)->except(['show']);
@@ -31,6 +32,10 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::resource('bookings', BookingManagementController::class)->only(['index', 'create', 'store', 'update']);
 });
 
+// Browser redirect back from Paynow checkout
+Route::get('/payments/paynow/return', [PaynowCallbackController::class, 'paymentReturn'])
+    ->name('paynow.return');
+
 // Account settings (kept from Breeze, useful for staff to manage their own login)
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -38,4 +43,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
