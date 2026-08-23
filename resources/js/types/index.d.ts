@@ -51,13 +51,23 @@ export interface Booking {
     phone: string;
     check_in: string;
     check_out: string;
+    actual_check_in_at?: string | null;
+    actual_check_out_at?: string | null;
     guests: number;
     party_size: number | null;
     total_price: number | string;
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+    status:
+        | 'pending'
+        | 'confirmed'
+        | 'checked_in'
+        | 'checked_out'
+        | 'cancelled'
+        | 'completed';
     payment_status: 'unpaid' | 'paid' | 'partially_paid' | 'refunded';
     payment_method: string | null;
     notes: string | null;
+    created_by: string | null;
+    created_at?: string;
 }
 
 export interface CartItem {
@@ -76,6 +86,23 @@ export type ChatRole = 'user' | 'assistant';
 export interface ChatMessage {
     role: ChatRole;
     content: string;
+}
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+export interface Paginated<T> {
+    data: T[];
+    links: PaginationLink[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
 }
 
 export type PageProps<

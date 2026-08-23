@@ -21,9 +21,11 @@ class PaynowService
         $this->isSandbox = (bool) config('services.paynow.sandbox', false);
         $this->testEmail = config('services.paynow.test_email');
 
-        // Safe runtime fallbacks using url() to avoid UrlGenerator exceptions during config:cache
-        $resultUrl = config('services.paynow.result_url') ?? url('/api/payments/paynow/callback');
-        $returnUrl = config('services.paynow.return_url') ?? url('/payments/paynow/return');
+        // Dynamically resolve active host (ngrok tunnel during web requests, or APP_URL fallback)
+        $baseUrl = request()->getSchemeAndHttpHost() ?: config('app.url');
+
+        $resultUrl = config('services.paynow.result_url') ?? "{$baseUrl}/api/payments/paynow/callback";
+        $returnUrl = config('services.paynow.return_url') ?? "{$baseUrl}/payments/paynow/return";
 
         $this->paynow = new Paynow($id, $key, $returnUrl, $resultUrl);
     }
@@ -47,7 +49,7 @@ class PaynowService
             'status'     => 'pending',
         ]);
 
-        // 4. Set callback and return routes with payment parameter for status resolution
+        // 4. Set callback and return routes using named routes (resolves against active request domain)
         $this->paynow->setResultUrl(route('paynow.callback', ['payment' => $payment->id]));
         $this->paynow->setReturnUrl(route('paynow.return', ['payment' => $payment->id]));
 
