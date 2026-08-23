@@ -34,6 +34,19 @@ export default function Confirmation({
     const copy = STATUS_COPY[status];
     const primary = bookings[0];
 
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return isNaN(date.getTime())
+            ? dateString
+            : date.toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                  timeZone: 'UTC',
+              });
+    };
+
     return (
         <SiteLayout>
             <Head title="Booking confirmation — Summit Lodge" />
@@ -57,7 +70,7 @@ export default function Confirmation({
 
                         <div className="mt-4 space-y-1 border-t border-line pt-4 text-sm text-ink/70">
                             <p>
-                                {primary.check_in} &rarr; {primary.check_out}
+                                {`${formatDate(primary.check_in)} → ${formatDate(primary.check_out)}`}
                             </p>
                             <p className="font-display text-lg text-ink">
                                 ${total}
