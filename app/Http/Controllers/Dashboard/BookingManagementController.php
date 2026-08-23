@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Enums\BookingStatus;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class BookingManagementController extends Controller
@@ -76,7 +77,7 @@ class BookingManagementController extends Controller
     public function update(Request $request, Booking $booking)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,confirmed,cancelled,completed'],
+            'status' => ['required', Rule::enum(BookingStatus::class)],
         ]);
 
         $booking->update($validated);
