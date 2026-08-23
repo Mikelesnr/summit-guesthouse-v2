@@ -1,23 +1,24 @@
-import { Head } from '@inertiajs/react';
 import SiteLayout from '@/Layouts/SiteLayout';
 import { Booking } from '@/types';
+import { Head } from '@inertiajs/react';
 
 type ConfirmationStatus = 'paid' | 'pending' | 'failed';
 
-const STATUS_COPY: Record<ConfirmationStatus, { title: string; body: string }> = {
-    paid: {
-        title: "You're booked.",
-        body: 'Payment received — a confirmation has been sent to your email. We look forward to hosting you.',
-    },
-    pending: {
-        title: 'Almost there.',
-        body: "We're still waiting on confirmation from Paynow. This page will update shortly — you can also refresh in a minute.",
-    },
-    failed: {
-        title: "That didn't go through.",
-        body: "Your payment wasn't completed. No charge was made — feel free to try again, or message us on WhatsApp and we'll help directly.",
-    },
-};
+const STATUS_COPY: Record<ConfirmationStatus, { title: string; body: string }> =
+    {
+        paid: {
+            title: "You're booked.",
+            body: 'Payment received — a confirmation has been sent to your email. We look forward to hosting you.',
+        },
+        pending: {
+            title: 'Almost there.',
+            body: "We're still waiting on confirmation from Paynow. This page will update shortly — you can also refresh in a minute.",
+        },
+        failed: {
+            title: "That didn't go through.",
+            body: "Your payment wasn't completed. No charge was made — feel free to try again, or message us on WhatsApp and we'll help directly.",
+        },
+    };
 
 interface ConfirmationProps {
     bookings: Booking[];
@@ -25,7 +26,11 @@ interface ConfirmationProps {
     status?: ConfirmationStatus;
 }
 
-export default function Confirmation({ bookings = [], total, status = 'pending' }: ConfirmationProps) {
+export default function Confirmation({
+    bookings = [],
+    total,
+    status = 'pending',
+}: ConfirmationProps) {
     const copy = STATUS_COPY[status];
     const primary = bookings[0];
 
@@ -40,7 +45,9 @@ export default function Confirmation({ bookings = [], total, status = 'pending' 
                 {primary && (
                     <div className="mt-8 rounded-2xl border border-line bg-white p-6 text-left shadow-card">
                         <p className="eyebrow">Booking reference</p>
-                        <p className="mt-1 font-mono text-sm text-ink">{primary.group_reference ?? primary.reference}</p>
+                        <p className="mt-1 font-mono text-sm text-ink">
+                            {primary.group_reference ?? primary.reference}
+                        </p>
 
                         <ul className="mt-4 space-y-1 text-sm text-ink/70">
                             {bookings.map((b) => (
@@ -49,8 +56,12 @@ export default function Confirmation({ bookings = [], total, status = 'pending' 
                         </ul>
 
                         <div className="mt-4 space-y-1 border-t border-line pt-4 text-sm text-ink/70">
-                            <p>{primary.check_in} &rarr; {primary.check_out}</p>
-                            <p className="font-display text-lg text-ink">${total}</p>
+                            <p>
+                                {primary.check_in} &rarr; {primary.check_out}
+                            </p>
+                            <p className="font-display text-lg text-ink">
+                                ${total}
+                            </p>
                         </div>
                     </div>
                 )}

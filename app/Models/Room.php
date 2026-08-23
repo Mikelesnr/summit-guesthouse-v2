@@ -94,7 +94,7 @@ class Room extends Model
         $query->selectRaw('COUNT(*)')
             ->from('bookings')
             ->whereColumn('bookings.room_id', 'rooms.id')
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['pending', 'confirmed', 'checked_in'])
             ->where('check_in', '<', $checkOut)
             ->where('check_out', '>', $checkIn);
     }

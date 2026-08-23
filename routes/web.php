@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\Dashboard\BookingManagementController;
+use App\Http\Controllers\Dashboard\DashboardIndexController;
 use App\Http\Controllers\Dashboard\RoomManagementController;
 use App\Http\Controllers\Dashboard\UserManagementController;
-use App\Http\Controllers\PaynowCallbackController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PaynowCallbackController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 // Public site
 Route::get('/', [PageController::class, 'welcome'])->name('home');
@@ -18,25 +18,41 @@ Route::get('/bookings/{reference}/confirmation', [PageController::class, 'bookin
 Route::get('/location', [PageController::class, 'location'])->name('location');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 
-// Staff dashboard — everything here requires login. `/login` itself is
-// NOT linked from the guest nav (see resources/js/Layouts/SiteLayout.tsx),
-// staff just know the URL.
+// Staff dashboard — main overview at /dashboard
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
-    Route::get('/', fn() => Inertia::render('Dashboard/Index'))->name('index');
+    // Overview tab landing page
+    Route::get('/', DashboardIndexController::class)->name('index');
 
+    // Manager / Owner / System Admin restricted routes
     Route::middleware('role:manager,owner,system_admin')->group(function () {
         Route::resource('rooms', RoomManagementController::class)->except(['show']);
         Route::resource('users', UserManagementController::class)->except(['show']);
     });
 
+    // Booking management routes
     Route::resource('bookings', BookingManagementController::class)->only(['index', 'create', 'store', 'update']);
+
+    Route::put('bookings/{booking}/take-over', [BookingManagementController::class, 'takeOver'])
+        ->name('bookings.take-over');
+
+    Route::put('bookings/{booking}/check-in', [BookingManagementController::class, 'checkIn'])
+        ->name('bookings.check-in');
+
+    Route::put('bookings/{booking}/check-in-group', [BookingManagementController::class, 'checkInGroup'])
+        ->name('bookings.check-in-group');
+
+    Route::put('bookings/{booking}/check-out', [BookingManagementController::class, 'checkOut'])
+        ->name('bookings.check-out');
+
+    Route::put('bookings/{booking}/check-out-group', [BookingManagementController::class, 'checkOutGroup'])
+        ->name('bookings.check-out-group');
 });
 
 // Browser redirect back from Paynow checkout
 Route::get('/payments/paynow/return', [PaynowCallbackController::class, 'paymentReturn'])
     ->name('paynow.return');
 
-// Account settings (kept from Breeze, useful for staff to manage their own login)
+// Account settings
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

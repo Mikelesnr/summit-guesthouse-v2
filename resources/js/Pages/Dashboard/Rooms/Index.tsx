@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Room } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface RoomsIndexProps {
     rooms: Room[];
@@ -15,7 +15,8 @@ export default function Index({ rooms = [] }: RoomsIndexProps) {
                 <h1 className="font-display text-2xl text-ink">Rooms</h1>
             </div>
             <p className="mt-1 text-sm text-ink/60">
-                Quantity is how many physical rooms of this type exist — it&apos;s what stops the site double-booking.
+                Quantity is how many physical rooms of this type exist —
+                it&apos;s what stops the site double-booking.
             </p>
 
             <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-white shadow-card">
@@ -60,7 +61,7 @@ function RoomRow({ room }: { room: Room }) {
         const next = { ...values, ...patch };
         setValues(next);
         setSaving(true);
-        router.put(`/dashboard/rooms/${room.id}`, next as Record<string, any>, {
+        router.put(`/dashboard/rooms/${room.id}`, next, {
             preserveScroll: true,
             onFinish: () => setSaving(false),
         });
@@ -77,7 +78,9 @@ function RoomRow({ room }: { room: Room }) {
                         min={0}
                         step={1}
                         value={values.price}
-                        onChange={(e) => setValues((v) => ({ ...v, price: e.target.value }))}
+                        onChange={(e) =>
+                            setValues((v) => ({ ...v, price: e.target.value }))
+                        }
                         onBlur={() => save({ price: values.price })}
                         className="w-20 rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
                     />
@@ -88,7 +91,12 @@ function RoomRow({ room }: { room: Room }) {
                     type="number"
                     min={0}
                     value={values.quantity}
-                    onChange={(e) => setValues((v) => ({ ...v, quantity: Number(e.target.value) }))}
+                    onChange={(e) =>
+                        setValues((v) => ({
+                            ...v,
+                            quantity: Number(e.target.value),
+                        }))
+                    }
                     onBlur={() => save({ quantity: values.quantity })}
                     className="w-16 rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
                 />
@@ -96,7 +104,9 @@ function RoomRow({ room }: { room: Room }) {
             <td className="px-4 py-3">
                 <select
                     value={values.max_guests}
-                    onChange={(e) => save({ max_guests: Number(e.target.value) })}
+                    onChange={(e) =>
+                        save({ max_guests: Number(e.target.value) })
+                    }
                     className="rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
                 >
                     <option value={1}>1</option>

@@ -19,6 +19,12 @@ enum UserRole: string
         };
     }
 
+    /** Roles allowed to view overall financial revenue metrics. */
+    public static function canViewRevenue(): array
+    {
+        return [self::Manager->value, self::Owner->value, self::SystemAdmin->value];
+    }
+
     /** Roles allowed to manage rooms (prices, quantity, photos). */
     public static function canManageRooms(): array
     {
@@ -58,8 +64,8 @@ enum UserRole: string
     public static function visibleTo(self $viewer): array
     {
         return array_values(array_map(
-            fn (self $role) => $role->value,
-            array_filter(self::cases(), fn (self $role) => $role->rank() <= $viewer->rank())
+            fn(self $role) => $role->value,
+            array_filter(self::cases(), fn(self $role) => $role->rank() <= $viewer->rank())
         ));
     }
 }
