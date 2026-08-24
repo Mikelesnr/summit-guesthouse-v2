@@ -36,6 +36,7 @@ export interface Room {
     is_featured: boolean;
     is_active: boolean;
     extras: string[] | null;
+    ical_import_url?: string | null;
     images?: RoomImage[];
 }
 
@@ -47,7 +48,7 @@ export interface Booking {
     room?: Room;
     first_name: string;
     last_name: string;
-    email: string;
+    email: string | null;
     phone: string;
     check_in: string;
     check_out: string;
@@ -68,6 +69,8 @@ export interface Booking {
     notes: string | null;
     created_by: string | null;
     created_at?: string;
+    source?: 'booking_com' | null;
+    source_uid?: string | null;
 }
 
 export interface CartItem {

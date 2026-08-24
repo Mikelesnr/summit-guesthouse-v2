@@ -37,6 +37,25 @@ export default function Index({ rooms = [] }: RoomsIndexProps) {
                     </tbody>
                 </table>
             </div>
+
+            <div className="mt-10">
+                <h2 className="font-display text-lg text-ink">
+                    Booking.com calendar sync
+                </h2>
+                <p className="mt-1 text-sm text-ink/60">
+                    For each room: copy the &quot;Our calendar&quot; link into
+                    Booking.com&apos;s Extranet (Calendar &rarr; Sync calendars
+                    &rarr; Export), then paste the .ics link Booking.com gives
+                    you back into &quot;Booking.com&apos;s calendar&quot; below.
+                    Synced automatically every few minutes once both are set.
+                </p>
+
+                <div className="mt-4 space-y-4">
+                    {rooms.map((room) => (
+                        <IcalRow key={room.id} room={room} />
+                    ))}
+                </div>
+            </div>
         </DashboardLayout>
     );
 }
@@ -124,5 +143,84 @@ function RoomRow({ room }: { room: Room }) {
                 </label>
             </td>
         </tr>
+    );
+}
+
+function IcalRow({ room }: { room: Room }) {
+    const [url, setUrl] = useState(room.ical_import_url ?? '');
+    const [saving, setSaving] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const exportUrl = `${window.location.origin}/ical/rooms/${room.id}.ics`;
+
+    function save() {
+        setSaving(true);
+        router.put(
+            `/dashboard/rooms/${room.id}`,
+            { ical_import_url: url || null },
+            { preserveScroll: true, onFinish: () => setSaving(false) },
+        );
+    }
+
+    function copyExportUrl() {
+        navigator.clipboard.writeText(exportUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    }
+
+    return (
+        <div className="rounded-2xl border border-line bg-white p-4 shadow-card">
+            <p className="font-medium text-ink">{room.name}</p>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="block">
+                    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                        Our calendar (give this to Booking.com)
+                    </span>
+                    <div className="flex gap-2">
+                        <input
+                            readOnly
+                            value={exportUrl}
+                            onFocus={(e) => e.target.select()}
+                            className="w-full rounded-lg border-line bg-cream-deep text-xs text-ink/70 focus:border-gold focus:ring-gold"
+                        />
+                        <button
+                            type="button"
+                            onClick={copyExportUrl}
+                            className="btn-secondary shrink-0 px-3 py-1 text-xs"
+                        >
+                            {copied ? 'Copied' : 'Copy'}
+                        </button>
+                    </div>
+                </label>
+
+                <label className="block">
+                    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                        Booking.com&apos;s calendar (paste theirs here)
+                    </span>
+                    <div className="flex gap-2">
+                        <input
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            placeholder="https://admin.booking.com/...ics"
+                            className="w-full rounded-lg border-line text-xs focus:border-gold focus:ring-gold"
+                        />
+                        <button
+                            type="button"
+                            onClick={save}
+                            disabled={saving}
+                            className="btn-primary shrink-0 px-3 py-1 text-xs"
+                        >
+                            {saving ? 'Saving…' : 'Save'}
+                        </button>
+                    </div>
+                </label>
+            </div>
+
+            <p className="mt-2 text-xs text-ink/40">
+                {room.ical_import_url
+                    ? 'Connected — syncing automatically.'
+                    : 'Not connected yet.'}
+            </p>
+        </div>
     );
 }

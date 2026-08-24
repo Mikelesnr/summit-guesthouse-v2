@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\UserManagementController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaynowCallbackController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoomIcalController;
 use Illuminate\Support\Facades\Route;
 
 // Public site
@@ -17,6 +18,11 @@ Route::get('/book', [PageController::class, 'bookSearch'])->name('book');
 Route::get('/bookings/{reference}/confirmation', [PageController::class, 'bookingConfirmation'])->name('bookings.confirmation');
 Route::get('/location', [PageController::class, 'location'])->name('location');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+
+// Outbound calendar feed for Booking.com (and any future OTA) to subscribe
+// to — deliberately outside the `auth` group, their servers poll this
+// unauthenticated, same as every other free iCal integration.
+Route::get('/ical/rooms/{room}.ics', [RoomIcalController::class, 'export'])->name('rooms.ical');
 
 // Staff dashboard — main overview at /dashboard
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {

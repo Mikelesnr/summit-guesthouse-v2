@@ -26,6 +26,7 @@ class Room extends Model
         'is_featured',
         'is_active',
         'extras',
+        'ical_import_url',
     ];
 
     protected $casts = [
