@@ -58,11 +58,21 @@ export default function BookingModal({ booking, onClose }: Props) {
 
                 <div className="mt-4 space-y-3 text-sm text-ink/80">
                     <p>
-                        <strong>Guest:</strong> {booking.first_name}{' '}
-                        {booking.last_name}
+                        <strong>Guest:</strong>{' '}
+                        {booking.first_name || booking.last_name
+                            ? `${booking.first_name} ${booking.last_name}`
+                            : 'Not yet filled in (Booking.com)'}
                     </p>
+                    {booking.source === 'booking_com' &&
+                        !booking.created_by && (
+                            <p className="rounded-lg bg-gold-light/20 px-3 py-2 text-xs font-medium text-gold-dark">
+                                Synced from Booking.com — use &quot;Take
+                                over&quot; on the bookings list to fill in guest
+                                details.
+                            </p>
+                        )}
                     <p>
-                        <strong>Phone:</strong> {booking.phone}
+                        <strong>Phone:</strong> {booking.phone || 'N/A'}
                     </p>
                     <p>
                         <strong>Email:</strong> {booking.email || 'N/A'}

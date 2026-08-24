@@ -26,6 +26,12 @@ function isStale(booking: Booking): boolean {
     return ageMinutes > STALE_AFTER_MINUTES;
 }
 
+// Placeholder rows the Booking.com sync created — no guest details yet,
+// and nobody's claimed them via take-over.
+function needsDetails(booking: Booking): boolean {
+    return booking.source === 'booking_com' && !booking.created_by;
+}
+
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
     day: 'numeric',
@@ -182,6 +188,27 @@ function PaginationItem({ link }: { link: PaginationLink }) {
     );
 }
 
+function GuestName({ booking: b }: { booking: Booking }) {
+    if (!b.first_name && !b.last_name) {
+        return (
+            <p className="font-medium italic text-ink/50">Booking.com guest</p>
+        );
+    }
+    return (
+        <p className="font-medium text-ink">
+            {b.first_name} {b.last_name}
+        </p>
+    );
+}
+
+function NeedsDetailsBadge() {
+    return (
+        <p className="mt-1 text-xs font-medium text-gold-dark">
+            via Booking.com — needs details
+        </p>
+    );
+}
+
 function BookingRow({
     booking: b,
     onUpdateStatus,
@@ -206,11 +233,10 @@ function BookingRow({
                         onClick={onViewDetails}
                         className="text-left hover:underline"
                     >
-                        <p className="font-medium text-ink">
-                            {b.first_name} {b.last_name}
-                        </p>
-                        <p className="text-xs text-ink/50">{b.phone}</p>
+                        <GuestName booking={b} />
+                        <p className="text-xs text-ink/50">{b.phone || '—'}</p>
                     </button>
+                    {needsDetails(b) && <NeedsDetailsBadge />}
                 </td>
                 <td className="px-4 py-3">{b.room?.name}</td>
                 <td className="px-4 py-3 text-ink/70">
@@ -224,10 +250,10 @@ function BookingRow({
                     </span>
                     {b.payment_method && (
                         <p className="mt-1 text-xs capitalize text-ink/40">
-                            {b.payment_method}
+                            {b.payment_method.replace('_', '.')}
                         </p>
                     )}
-                    {!b.created_by && stale && (
+                    {!b.created_by && !needsDetails(b) && stale && (
                         <p className="mt-1 text-xs font-medium text-red-600">
                             stuck / abandoned
                         </p>
@@ -297,10 +323,8 @@ function BookingCard({
                     onClick={onViewDetails}
                     className="text-left hover:underline"
                 >
-                    <p className="font-medium text-ink">
-                        {b.first_name} {b.last_name}
-                    </p>
-                    <p className="text-xs text-ink/50">{b.phone}</p>
+                    <GuestName booking={b} />
+                    <p className="text-xs text-ink/50">{b.phone || '—'}</p>
                 </button>
                 <select
                     value={b.status}
@@ -318,6 +342,8 @@ function BookingCard({
                 </select>
             </div>
 
+            {needsDetails(b) && <NeedsDetailsBadge />}
+
             <div className="mt-3 space-y-1 text-sm text-ink/70">
                 <p>{b.room?.name}</p>
                 <p>{formatDateRange(b.check_in, b.check_out)}</p>
@@ -329,11 +355,11 @@ function BookingCard({
                     </span>
                     {b.payment_method && (
                         <span className="text-xs capitalize text-ink/40">
-                            {b.payment_method}
+                            {b.payment_method.replace('_', '.')}
                         </span>
                     )}
                 </p>
-                {!b.created_by && stale && (
+                {!b.created_by && !needsDetails(b) && stale && (
                     <p className="text-xs font-medium text-red-600">
                         stuck / abandoned
                     </p>
@@ -382,6 +408,8 @@ function TakeOverRow({
     );
 }
 
+type PaymentMethod = 'cash' | 'ecocash' | 'onemoney' | 'card' | 'booking_com';
+
 function TakeOverFields({
     booking,
     onDone,
@@ -391,17 +419,39 @@ function TakeOverFields({
     onDone: () => void;
     inline?: boolean;
 }) {
-    const [paymentMethod, setPaymentMethod] = useState<
-        'cash' | 'ecocash' | 'onemoney' | 'card'
-    >('cash');
-    const [paid, setPaid] = useState(true);
+    const placeholder = needsDetails(booking);
+
+    const [firstName, setFirstName] = useState(booking.first_name);
+    const [lastName, setLastName] = useState(booking.last_name);
+    const [email, setEmail] = useState(booking.email ?? '');
+    const [phone, setPhone] = useState(booking.phone);
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+        placeholder ? 'booking_com' : 'cash',
+    );
+    const [paid, setPaid] = useState(!placeholder);
     const [submitting, setSubmitting] = useState(false);
+
+    function changePaymentMethod(method: PaymentMethod) {
+        setPaymentMethod(method);
+        // Booking.com collects payment itself (or the guest pays at
+        // checkout) — our system never actually took the money, so don't
+        // default to "paid" the way a cash/EcoCash take-over would. Staff
+        // can still tick it if it's since been reconciled.
+        if (method === 'booking_com') setPaid(false);
+    }
 
     function submit() {
         setSubmitting(true);
         router.put(
             `/dashboard/bookings/${booking.id}/take-over`,
-            { payment_method: paymentMethod, paid },
+            {
+                payment_method: paymentMethod,
+                paid,
+                first_name: firstName,
+                last_name: lastName,
+                email: email || null,
+                phone,
+            },
             {
                 preserveScroll: true,
                 onFinish: () => {
@@ -413,51 +463,110 @@ function TakeOverFields({
     }
 
     return (
-        <div
-            className={inline ? 'flex flex-wrap items-end gap-4' : 'space-y-3'}
-        >
+        <div className={inline ? 'space-y-4' : 'space-y-3'}>
             {inline && (
                 <p className="text-sm text-ink/70">
-                    Guest paid another way — record it and this booking becomes
-                    a staff-handled walk-in.
+                    {placeholder
+                        ? 'Fill in the guest\u2019s details from the Booking.com confirmation email — this becomes a regular staff-handled booking.'
+                        : 'Guest paid another way — record it and this booking becomes a staff-handled walk-in.'}
                 </p>
             )}
 
-            <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
-                    Payment method
-                </span>
-                <select
-                    value={paymentMethod}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                        setPaymentMethod(e.target.value as typeof paymentMethod)
-                    }
-                    className="w-full rounded-lg border-line text-sm focus:border-gold focus:ring-gold sm:w-auto"
-                >
-                    <option value="cash">Cash</option>
-                    <option value="ecocash">EcoCash</option>
-                    <option value="onemoney">OneMoney</option>
-                    <option value="card">Card</option>
-                </select>
-            </label>
+            {placeholder && (
+                <div className="grid grid-cols-1 gap-3 sm:max-w-xl sm:grid-cols-2">
+                    <Field
+                        label="First name"
+                        value={firstName}
+                        onChange={setFirstName}
+                    />
+                    <Field
+                        label="Last name"
+                        value={lastName}
+                        onChange={setLastName}
+                    />
+                    <Field
+                        label="Phone"
+                        value={phone}
+                        onChange={setPhone}
+                        type="tel"
+                    />
+                    <Field
+                        label="Email (optional)"
+                        value={email}
+                        onChange={setEmail}
+                        type="email"
+                    />
+                </div>
+            )}
 
-            <label className="flex items-center gap-2 text-sm text-ink/70">
-                <input
-                    type="checkbox"
-                    checked={paid}
-                    onChange={(e) => setPaid(e.target.checked)}
-                    className="rounded border-line text-gold focus:ring-gold"
-                />
-                Payment collected
-            </label>
-
-            <button
-                onClick={submit}
-                disabled={submitting}
-                className="btn-primary w-full px-4 py-2 text-xs sm:w-auto"
+            <div
+                className={
+                    inline ? 'flex flex-wrap items-end gap-4' : 'space-y-3'
+                }
             >
-                {submitting ? 'Saving…' : 'Confirm take-over'}
-            </button>
+                <label className="block">
+                    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                        Payment method
+                    </span>
+                    <select
+                        value={paymentMethod}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                            changePaymentMethod(e.target.value as PaymentMethod)
+                        }
+                        className="w-full rounded-lg border-line text-sm focus:border-gold focus:ring-gold sm:w-auto"
+                    >
+                        <option value="cash">Cash</option>
+                        <option value="ecocash">EcoCash</option>
+                        <option value="onemoney">OneMoney</option>
+                        <option value="card">Card</option>
+                        <option value="booking_com">Booking.com</option>
+                    </select>
+                </label>
+
+                <label className="flex items-center gap-2 text-sm text-ink/70">
+                    <input
+                        type="checkbox"
+                        checked={paid}
+                        onChange={(e) => setPaid(e.target.checked)}
+                        className="rounded border-line text-gold focus:ring-gold"
+                    />
+                    Payment collected
+                </label>
+
+                <button
+                    onClick={submit}
+                    disabled={submitting}
+                    className="btn-primary w-full px-4 py-2 text-xs sm:w-auto"
+                >
+                    {submitting ? 'Saving…' : 'Confirm take-over'}
+                </button>
+            </div>
         </div>
+    );
+}
+
+function Field({
+    label,
+    value,
+    onChange,
+    type = 'text',
+}: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    type?: string;
+}) {
+    return (
+        <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                {label}
+            </span>
+            <input
+                type={type}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full rounded-lg border-line text-sm focus:border-gold focus:ring-gold"
+            />
+        </label>
     );
 }

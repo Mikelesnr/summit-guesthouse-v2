@@ -99,8 +99,15 @@ class BookingManagementController extends Controller
         abort_if($booking->payment_status === 'paid', 422, 'This booking is already paid — nothing to take over.');
 
         $validated = $request->validate([
-            'payment_method' => ['required', 'in:cash,ecocash,onemoney,card'],
+            'payment_method' => ['required', 'in:cash,ecocash,onemoney,card,booking_com'],
             'paid' => ['boolean'],
+            // Optional — a normal (Paynow-failed) take-over already has these;
+            // a Booking.com placeholder booking starts with none, so staff
+            // fill them in here from the confirmation email.
+            'first_name' => ['sometimes', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'email'],
+            'phone' => ['sometimes', 'string', 'max:30'],
         ]);
 
         $paid = $validated['paid'] ?? true;
@@ -114,6 +121,7 @@ class BookingManagementController extends Controller
             'payment_method' => $validated['payment_method'],
             'status' => $paid ? 'confirmed' : 'pending',
             'payment_status' => $paid ? 'paid' : 'unpaid',
+            ...collect($validated)->only(['first_name', 'last_name', 'email', 'phone'])->all(),
         ]);
 
         return back()->with('success', 'Booking taken over — now handled as a walk-in.');

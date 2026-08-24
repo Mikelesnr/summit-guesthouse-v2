@@ -32,6 +32,8 @@ class Booking extends Model
         'payment_method',
         'notes',
         'created_by',
+        'source',
+        'source_uid',
     ];
 
     protected $casts = [
