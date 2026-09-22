@@ -44,6 +44,7 @@ class RoomManagementController extends Controller
             'max_guests' => ['sometimes', 'integer', 'min:1', 'max:2'],
             'is_active' => ['sometimes', 'boolean'],
             'description' => ['sometimes', 'nullable', 'string'],
+            'ical_import_url' => ['sometimes', 'nullable', 'url', 'max:2048'],
         ]);
 
         $room->update($validated);

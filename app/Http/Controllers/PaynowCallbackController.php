@@ -10,37 +10,73 @@ use Illuminate\Support\Facades\Log;
 class PaynowCallbackController extends Controller
 {
     /**
-     * Paynow POSTs here directly (result_url) once a payment settles.
-     * Lives in routes/api.php, which uses the stateless `api` middleware
-     * group — no CSRF, no session required.
+     * Server-to-server POST from Paynow (result_url).
      */
-    public function callback(Payment $payment, PaynowService $paynow)
+    public function callback(Request $request, PaynowService $paynow)
     {
-        $paynow->checkStatus($payment);
+        Log::info('Paynow POST Webhook Received:', $request->all());
+
+        $reference = $request->input('reference');
+        $payment = Payment::where('reference', $reference)->first();
+
+        if (!$payment) {
+            Log::error("Paynow Callback Failed: Payment not found for reference '{$reference}'");
+            return response('Payment Not Found', 404);
+        }
+
+        $status = $paynow->checkStatus($payment);
+        Log::info("Paynow Webhook Processed for '{$reference}'. Status: {$status}");
 
         return response('OK', 200);
     }
 
-    public function handleGenericCallback(Request $request, PaynowService $paynow)
+    /**
+     * Browser redirect GET from Paynow (return_url).
+     */
+    public function paymentReturn(Request $request, PaynowService $paynow)
     {
-        // Use 'reference' because that is the key in the payload you provided
-        $reference = $request->input('reference');
+        Log::info('Paynow GET Return Received:', $request->all());
 
-        Log::info("Paynow Callback Received for reference: " . $reference);
+        // 1. First, check if Paynow sent the payment ID directly (?payment=01a02d...)
+        $paymentId = $request->query('payment');
 
-        // Find the payment record in your database
-        $payment = Payment::where('reference', $reference)->firstOrFail();
+        // 2. Otherwise, check for reference query params (?reference=... or ?paynow_reference=...)
+        $reference = $request->query('reference') ?? $request->query('paynow_reference');
 
-        // Call your existing callback logic
-        // We pass the $payment and the $paynow service
-        return $this->callback($payment, $paynow);
+        $payment = null;
+
+        if ($paymentId) {
+            $payment = Payment::find($paymentId);
+        } elseif ($reference) {
+            $payment = Payment::where('reference', $reference)
+                ->orWhere('paynow_reference', $reference)
+                ->first();
+        }
+
+        if ($payment) {
+            // Sync status with Paynow in case the background webhook hit latency
+            $paynow->checkStatus($payment);
+
+            return redirect()->route('bookings.confirmation', [
+                'reference' => $payment->booking->group_reference,
+            ]);
+        }
+
+        Log::warning('Paynow Return Warning: No matching Payment found in database.', $request->all());
+
+        return redirect()->route('home');
     }
 
-    /** Used by the frontend to poll "has this paid yet?" after redirect back. */
+    /**
+     * Front-end status polling endpoint.
+     */
     public function status(Payment $payment, PaynowService $paynow)
     {
         $status = $paynow->checkStatus($payment);
 
-        return response()->json(['status' => $status]);
+        return response()->json([
+            'status' => $status,
+            'payment' => $payment->load('booking'),
+        ]);
     }
 }

@@ -26,6 +26,7 @@ class Room extends Model
         'is_featured',
         'is_active',
         'extras',
+        'ical_import_url',
     ];
 
     protected $casts = [
@@ -58,12 +59,6 @@ class Room extends Model
 
     /**
      * Rooms that still have at least one unit free for the given date range.
-     * Deliberately does NOT filter by guest count — a search is for a whole
-     * party (which may need several rooms), not "does one room fit everyone".
-     * Per-room capacity (max 2) is enforced when building the cart instead.
-     *
-     * Two date ranges overlap unless one ends before the other starts,
-     * i.e. NOT (existing.check_out <= new.check_in OR existing.check_in >= new.check_out).
      */
     public function scopeAvailableBetween(Builder $query, string $checkIn, string $checkOut): Builder
     {
@@ -74,27 +69,30 @@ class Room extends Model
     }
 
     /**
-     * Same rooms as scopeAvailableBetween, but annotated with how many
-     * units are actually free (`available_quantity`) so the booking page
-     * can cap a quantity stepper per room type instead of a single pick.
+     * Annotates rooms with available_quantity.
      */
     public function scopeWithAvailableQuantity(Builder $query, string $checkIn, string $checkOut): Builder
     {
         return $query->selectRaw('rooms.*, quantity - (
                 select count(*) from bookings
                 where bookings.room_id = rooms.id
-                and bookings.status in (?, ?)
+                and bookings.status in (?, ?, ?)
                 and bookings.check_in < ?
                 and bookings.check_out > ?
-            ) as available_quantity', ['pending', 'confirmed', $checkOut, $checkIn]);
+            ) as available_quantity', ['pending', 'confirmed', 'checked_in', $checkOut, $checkIn]);
     }
 
+    /**
+     * Helper to count overlapping active bookings for availability subqueries.
+     *
+     * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder $query
+     */
     private function addOverlapCount($query, string $checkIn, string $checkOut): void
     {
         $query->selectRaw('COUNT(*)')
             ->from('bookings')
             ->whereColumn('bookings.room_id', 'rooms.id')
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['pending', 'confirmed', 'checked_in'])
             ->where('check_in', '<', $checkOut)
             ->where('check_out', '>', $checkIn);
     }

@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
 import { Room } from '@/types';
+import { Link } from '@inertiajs/react';
 
 interface RoomCardProps {
     room: Room;
@@ -8,10 +8,14 @@ interface RoomCardProps {
     viewHref?: string;
 }
 
-export default function RoomCard({ room, onSelect, selectLabel = 'Select room', viewHref }: RoomCardProps) {
+export default function RoomCard({
+    room,
+    onSelect,
+    selectLabel = 'Select room',
+    viewHref,
+}: RoomCardProps) {
     const image = room.images?.[0]?.path;
     console.log(room.images);
-    
 
     const media = (
         <div className="relative h-56 w-full overflow-hidden bg-cream-deep">
@@ -40,21 +44,37 @@ export default function RoomCard({ room, onSelect, selectLabel = 'Select room', 
 
             <div className="flex flex-1 flex-col p-5">
                 <h3 className="font-display text-lg text-ink">
-                    {viewHref ? <Link href={viewHref} className="hover:text-gold-dark">{room.name}</Link> : room.name}
+                    {viewHref ? (
+                        <Link href={viewHref} className="hover:text-gold-dark">
+                            {room.name}
+                        </Link>
+                    ) : (
+                        room.name
+                    )}
                 </h3>
                 <p className="mt-1 text-sm text-ink/60">
-                    {room.type === 'double' ? 'Double room' : 'Single room'} · up to {room.max_guests} guest{room.max_guests > 1 ? 's' : ''}
+                    {room.type === 'double' ? 'Double room' : 'Single room'} ·
+                    up to {room.max_guests} guest
+                    {room.max_guests > 1 ? 's' : ''}
                     {room.has_breakfast ? ' · breakfast included' : ''}
                 </p>
 
-                <p className="mt-3 line-clamp-2 text-sm text-ink/70">{room.description}</p>
+                <p className="mt-3 line-clamp-2 text-sm text-ink/70">
+                    {room.description}
+                </p>
 
                 <div className="mt-auto flex items-center justify-between pt-5">
                     <p className="font-display text-xl text-ink">
                         ${Number(room.price).toFixed(0)}
-                        <span className="font-sans text-sm text-ink/50"> / night</span>
+                        <span className="font-sans text-sm text-ink/50">
+                            {' '}
+                            / night
+                        </span>
                     </p>
-                    <button onClick={() => onSelect(room)} className="btn-secondary px-4 py-2 text-xs">
+                    <button
+                        onClick={() => onSelect(room)}
+                        className="btn-secondary px-4 py-2 text-xs"
+                    >
                         {selectLabel}
                     </button>
                 </div>

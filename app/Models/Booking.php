@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,8 @@ class Booking extends Model
         'phone',
         'check_in',
         'check_out',
+        'actual_check_in_at',
+        'actual_check_out_at',
         'guests',
         'party_size',
         'total_price',
@@ -29,12 +32,17 @@ class Booking extends Model
         'payment_method',
         'notes',
         'created_by',
+        'source',
+        'source_uid',
     ];
 
     protected $casts = [
-        'check_in' => 'date',
-        'check_out' => 'date',
-        'total_price' => 'decimal:2',
+        'check_in'            => 'date',
+        'check_out'           => 'date',
+        'actual_check_in_at'  => 'datetime',
+        'actual_check_out_at' => 'datetime',
+        'total_price'         => 'decimal:2',
+        'status'              => BookingStatus::class,
     ];
 
     protected static function booted(): void

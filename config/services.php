@@ -36,10 +36,12 @@ return [
     ],
 
     'paynow' => [
-        'integration_id' => env('PAYNOW_INTEGRATION_ID'),
+        'integration_id'  => env('PAYNOW_INTEGRATION_ID'),
         'integration_key' => env('PAYNOW_INTEGRATION_KEY'),
-        'result_url' => env('PAYNOW_RESULT_URL', env('APP_URL') . '/api/payments/paynow/callback'),
-        'return_url' => env('PAYNOW_RETURN_URL', env('APP_URL') . '/bookings/{reference}/confirmation'),
+        'test_email'      => env('PAYNOW_TEST_EMAIL'),
+        'sandbox'         => env('PAYNOW_SANDBOX', false),
+        'result_url'      => env('PAYNOW_RESULT_URL'),
+        'return_url'      => env('PAYNOW_RETURN_URL'),
     ],
 
     'gemini' => [

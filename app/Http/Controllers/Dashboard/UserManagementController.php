@@ -73,7 +73,7 @@ class UserManagementController extends Controller
             'name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'role' => ['sometimes', Rule::in($viewer->visibleRoles())],
-            'is_is_active' => ['sometimes', 'boolean'],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         if ($user->is($viewer)) {

@@ -45,8 +45,13 @@ class PageController extends Controller
 
     public function bookingConfirmation(string $reference)
     {
-        $primary = Booking::with('room')->where('reference', $reference)->firstOrFail();
+        // 1. Locate the booking by group_reference OR primary reference
+        $primary = Booking::with('room')
+            ->where('group_reference', $reference)
+            ->orWhere('reference', $reference)
+            ->firstOrFail();
 
+        // 2. Fetch all rooms in the group if group_reference exists
         $bookings = $primary->group_reference
             ? Booking::with('room')->where('group_reference', $primary->group_reference)->get()
             : collect([$primary]);

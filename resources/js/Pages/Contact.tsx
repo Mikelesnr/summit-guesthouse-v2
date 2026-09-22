@@ -1,6 +1,6 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
-import { Head } from '@inertiajs/react';
 import SiteLayout from '@/Layouts/SiteLayout';
+import { Head } from '@inertiajs/react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? '263780652983';
 
@@ -34,16 +34,24 @@ export default function Contact() {
             <Head title="Contact — Summit Lodge" />
             <section className="mx-auto max-w-5xl px-6 py-16">
                 <p className="eyebrow">Contact</p>
-                <h1 className="mt-2 font-display text-3xl text-ink">Talk to us directly</h1>
+                <h1 className="mt-2 font-display text-3xl text-ink">
+                    Talk to us directly
+                </h1>
                 <p className="mt-4 max-w-lg text-sm text-ink/70">
-                    Everyone here reaches us fastest on WhatsApp. Fill this in and we&apos;ll open a chat with your
-                    message already typed out — or tap the floating WhatsApp button any time.
+                    Everyone here reaches us fastest on WhatsApp. Fill this in
+                    and we&apos;ll open a chat with your message already typed
+                    out — or tap the floating WhatsApp button any time.
                 </p>
 
                 <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
-                    <form onSubmit={submit} className="space-y-4 rounded-2xl border border-line bg-white p-6 shadow-card">
+                    <form
+                        onSubmit={submit}
+                        className="space-y-4 rounded-2xl border border-line bg-white p-6 shadow-card"
+                    >
                         <label className="block">
-                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Full name</span>
+                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                                Full name
+                            </span>
                             <input
                                 required
                                 value={form.name}
@@ -53,7 +61,9 @@ export default function Contact() {
                         </label>
 
                         <label className="block">
-                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Message</span>
+                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                                Message
+                            </span>
                             <textarea
                                 required
                                 rows={6}
@@ -68,18 +78,45 @@ export default function Contact() {
                             Continue on WhatsApp
                         </button>
                         <p className="text-center text-xs text-ink/40">
-                            Opens WhatsApp with your message ready to send — nothing is sent until you do.
+                            Opens WhatsApp with your message ready to send —
+                            nothing is sent until you do.
                         </p>
                     </form>
 
                     <div>
                         <div className="space-y-2 text-sm text-ink/70">
-                            <p><a href="tel:+263780652983" className="hover:text-ink">+263 78 065 2983</a></p>
-                            <p><a href="tel:+263718267984" className="hover:text-ink">+263 71 826 7984</a></p>
-                            <p><a href="mailto:summitguestlodge@gmail.com" className="hover:text-ink">summitguestlodge@gmail.com</a></p>
+                            <p>
+                                <a
+                                    href="tel:+263780652983"
+                                    className="hover:text-ink"
+                                >
+                                    +263 78 065 2983
+                                </a>
+                            </p>
+                            <p>
+                                <a
+                                    href="tel:+263718267984"
+                                    className="hover:text-ink"
+                                >
+                                    +263 71 826 7984
+                                </a>
+                            </p>
+                            <p>
+                                <a
+                                    href="mailto:summitguestlodge@gmail.com"
+                                    className="hover:text-ink"
+                                >
+                                    summitguestlodge@gmail.com
+                                </a>
+                            </p>
                             <p>687 Baobab Road, Beitbridge, Zimbabwe</p>
                             <p>
-                                <a href="https://www.facebook.com/Summitguestlodge" target="_blank" rel="noopener noreferrer" className="hover:text-ink">
+                                <a
+                                    href="https://www.facebook.com/Summitguestlodge"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-ink"
+                                >
                                     facebook.com/Summitguestlodge
                                 </a>
                             </p>

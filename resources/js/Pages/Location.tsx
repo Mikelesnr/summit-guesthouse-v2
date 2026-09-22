@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
 import SiteLayout from '@/Layouts/SiteLayout';
+import { Head } from '@inertiajs/react';
 
 export default function Location() {
     return (
@@ -7,10 +7,13 @@ export default function Location() {
             <Head title="Location — Summit Lodge" />
             <section className="mx-auto max-w-4xl px-6 py-16">
                 <p className="eyebrow">Find us</p>
-                <h1 className="mt-2 font-display text-3xl text-ink">Getting to Summit Lodge</h1>
+                <h1 className="mt-2 font-display text-3xl text-ink">
+                    Getting to Summit Lodge
+                </h1>
                 <p className="mt-4 max-w-lg text-sm text-ink/70">
-                    687 Baobab Road, Beitbridge, Zimbabwe — a short drive from the Beitbridge border post.
-                    Message us on WhatsApp if you&apos;d like turn-by-turn directions.
+                    687 Baobab Road, Beitbridge, Zimbabwe — a short drive from
+                    the Beitbridge border post. Message us on WhatsApp if
+                    you&apos;d like turn-by-turn directions.
                 </p>
 
                 <div className="mt-8 overflow-hidden rounded-2xl border border-line shadow-card">

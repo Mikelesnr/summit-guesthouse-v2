@@ -36,6 +36,7 @@ export interface Room {
     is_featured: boolean;
     is_active: boolean;
     extras: string[] | null;
+    ical_import_url?: string | null;
     images?: RoomImage[];
 }
 
@@ -47,17 +48,29 @@ export interface Booking {
     room?: Room;
     first_name: string;
     last_name: string;
-    email: string;
+    email: string | null;
     phone: string;
     check_in: string;
     check_out: string;
+    actual_check_in_at?: string | null;
+    actual_check_out_at?: string | null;
     guests: number;
     party_size: number | null;
     total_price: number | string;
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+    status:
+        | 'pending'
+        | 'confirmed'
+        | 'checked_in'
+        | 'checked_out'
+        | 'cancelled'
+        | 'completed';
     payment_status: 'unpaid' | 'paid' | 'partially_paid' | 'refunded';
     payment_method: string | null;
     notes: string | null;
+    created_by: string | null;
+    created_at?: string;
+    source?: 'booking_com' | null;
+    source_uid?: string | null;
 }
 
 export interface CartItem {
@@ -76,6 +89,23 @@ export type ChatRole = 'user' | 'assistant';
 export interface ChatMessage {
     role: ChatRole;
     content: string;
+}
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+export interface Paginated<T> {
+    data: T[];
+    links: PaginationLink[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
 }
 
 export type PageProps<

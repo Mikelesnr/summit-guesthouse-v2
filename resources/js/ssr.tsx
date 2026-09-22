@@ -20,7 +20,11 @@ createServer((page) =>
             /* eslint-disable */
             // We cast globalThis to any to bypass the bundler's strict syntax requirement
             // while still allowing the route function to be attached to the global object.
-            (globalThis as any).route = (name: any, params: any, absolute: any) =>
+            (globalThis as any).route = (
+                name: any,
+                params: any,
+                absolute: any,
+            ) =>
                 route(name, params, absolute, {
                     ...page.props.ziggy,
                     location: new URL(page.props.ziggy.location),

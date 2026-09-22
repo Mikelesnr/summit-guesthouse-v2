@@ -6,7 +6,11 @@ interface RoomCartCardProps {
     onChange: (quantity: number) => void;
 }
 
-export default function RoomCartCard({ room, quantity, onChange }: RoomCartCardProps) {
+export default function RoomCartCard({
+    room,
+    quantity,
+    onChange,
+}: RoomCartCardProps) {
     const image = room.images?.[0]?.path;
     const available = room.available_quantity ?? 0;
 
@@ -14,7 +18,11 @@ export default function RoomCartCard({ room, quantity, onChange }: RoomCartCardP
         <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card sm:flex-row">
             <div className="h-44 w-full shrink-0 overflow-hidden bg-cream-deep sm:h-auto sm:w-48">
                 {image ? (
-                    <img src={image} alt={room.name} className="h-full w-full object-cover" />
+                    <img
+                        src={image}
+                        alt={room.name}
+                        className="h-full w-full object-cover"
+                    />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center text-sm text-ink/30">
                         Photo coming soon
@@ -25,18 +33,26 @@ export default function RoomCartCard({ room, quantity, onChange }: RoomCartCardP
             <div className="flex flex-1 flex-col justify-between p-5">
                 <div>
                     <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-display text-lg text-ink">{room.name}</h3>
+                        <h3 className="font-display text-lg text-ink">
+                            {room.name}
+                        </h3>
                         <p className="font-display text-lg text-ink">
                             ${Number(room.price).toFixed(0)}
-                            <span className="font-sans text-xs text-ink/50"> / night</span>
+                            <span className="font-sans text-xs text-ink/50">
+                                {' '}
+                                / night
+                            </span>
                         </p>
                     </div>
                     <p className="mt-1 text-sm text-ink/60">
-                        Up to {room.max_guests} guest{room.max_guests > 1 ? 's' : ''} per room
+                        Up to {room.max_guests} guest
+                        {room.max_guests > 1 ? 's' : ''} per room
                         {room.has_breakfast ? ' · breakfast included' : ''}
                     </p>
                     <p className="mt-1 text-xs text-gold-dark">
-                        {available > 0 ? `${available} room${available > 1 ? 's' : ''} available` : 'Fully booked for these dates'}
+                        {available > 0
+                            ? `${available} room${available > 1 ? 's' : ''} available`
+                            : 'Fully booked for these dates'}
                     </p>
                 </div>
 
@@ -51,10 +67,14 @@ export default function RoomCartCard({ room, quantity, onChange }: RoomCartCardP
                         >
                             &minus;
                         </button>
-                        <span className="w-6 text-center text-sm font-medium text-ink">{quantity}</span>
+                        <span className="w-6 text-center text-sm font-medium text-ink">
+                            {quantity}
+                        </span>
                         <button
                             type="button"
-                            onClick={() => onChange(Math.min(available, quantity + 1))}
+                            onClick={() =>
+                                onChange(Math.min(available, quantity + 1))
+                            }
                             disabled={quantity >= available}
                             className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-ink disabled:opacity-30"
                             aria-label={`More ${room.name} rooms`}
@@ -63,7 +83,9 @@ export default function RoomCartCard({ room, quantity, onChange }: RoomCartCardP
                         </button>
                     </div>
                     {quantity > 0 && (
-                        <p className="text-xs text-ink/50">covers up to {quantity * room.max_guests} guests</p>
+                        <p className="text-xs text-ink/50">
+                            covers up to {quantity * room.max_guests} guests
+                        </p>
                     )}
                 </div>
             </div>

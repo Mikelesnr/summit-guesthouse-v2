@@ -8,7 +8,10 @@ interface ContourLinesProps {
  * page as a background texture (hero, section dividers), never as a
  * repeated pattern-fill, so it reads as a mark rather than wallpaper.
  */
-export default function ContourLines({ className = '', opacity = 0.16 }: ContourLinesProps) {
+export default function ContourLines({
+    className = '',
+    opacity = 0.16,
+}: ContourLinesProps) {
     return (
         <svg
             viewBox="0 0 600 400"

@@ -1,5 +1,5 @@
-import { FormEvent, useState } from 'react';
 import { AvailabilitySearch } from '@/types';
+import { FormEvent, useState } from 'react';
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
@@ -20,7 +20,11 @@ export default function AvailabilitySearchForm({
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        onSearch({ check_in: checkIn, check_out: checkOut, party_size: Number(partySize) });
+        onSearch({
+            check_in: checkIn,
+            check_out: checkOut,
+            party_size: Number(partySize),
+        });
     }
 
     return (
@@ -29,7 +33,9 @@ export default function AvailabilitySearchForm({
             className="grid grid-cols-1 gap-4 rounded-2xl border border-line bg-white/95 p-5 shadow-lift backdrop-blur sm:grid-cols-4 sm:items-end"
         >
             <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Check-in</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                    Check-in
+                </span>
                 <input
                     type="date"
                     required
@@ -41,7 +47,9 @@ export default function AvailabilitySearchForm({
             </label>
 
             <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">Check-out</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
+                    Check-out
+                </span>
                 <input
                     type="date"
                     required
@@ -54,7 +62,10 @@ export default function AvailabilitySearchForm({
 
             <label className="block">
                 <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60">
-                    Guests <span className="normal-case text-ink/40">(whole party)</span>
+                    Guests{' '}
+                    <span className="normal-case text-ink/40">
+                        (whole party)
+                    </span>
                 </span>
                 <input
                     type="number"
@@ -67,7 +78,11 @@ export default function AvailabilitySearchForm({
                 />
             </label>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full sm:w-auto">
+            <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full sm:w-auto"
+            >
                 {loading ? 'Searching…' : 'Check availability'}
             </button>
         </form>
