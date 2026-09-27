@@ -77,8 +77,19 @@ class BookingController extends Controller
         // The first booking serves as the anchor record for Paynow
         $primary = $bookings->first();
 
-        // Initiate payment (PaynowService sums all $lineItems automatically)
-        $payment = $paynow->initiate($primary->fresh('room'));
+        try {
+            $payment = $paynow->initiate($primary->fresh('room'));
+        } catch (\Throwable $e) {
+            // The bookings above are already committed (correctly still
+            // blocking the rooms) — we only failed to start the payment,
+            // so leave them as pending/unpaid and let the guest retry
+            // rather than losing their spot.
+            report($e);
+
+            return response()->json([
+                'message' => $e->getMessage() ?: 'Payment could not be started — please try again.',
+            ], 502);
+        }
 
         $eloquentBookings = Collection::make($bookings)->load('room');
 

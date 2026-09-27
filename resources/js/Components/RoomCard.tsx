@@ -15,7 +15,6 @@ export default function RoomCard({
     viewHref,
 }: RoomCardProps) {
     const image = room.images?.[0]?.path;
-    console.log(room.images);
 
     const media = (
         <div className="relative h-56 w-full overflow-hidden bg-cream-deep">
