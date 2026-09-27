@@ -18,6 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Render (like most PaaS hosts) terminates HTTPS at its edge and
+        // forwards plain HTTP internally. Without trusting that proxy,
+        // Laravel can't see the request was actually HTTPS, so it builds
+        // http:// URLs for things like the Paynow callback — which sandbox
+        // tolerates but live payment gateways typically reject outright.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
