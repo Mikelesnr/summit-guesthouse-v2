@@ -12,10 +12,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
         <div className="min-h-screen bg-cream">
             <div className="flex">
                 <aside className="hidden w-56 shrink-0 border-r border-line bg-white/60 p-6 sm:block">
-                    <Link
-                        href="/dashboard"
-                        className="font-display text-lg text-ink"
-                    >
+                    <Link href="/" className="font-display text-lg text-ink">
                         Summit Lodge
                     </Link>
                     <p className="mt-1 text-xs uppercase tracking-wide text-ink/40">
