@@ -28,7 +28,14 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             <Head title="Staff login — Summit Lodge" />
 
             <div className="w-full max-w-sm rounded-2xl border border-cream/10 bg-cream p-8 shadow-lift">
-                <p className="font-display text-lg text-ink">Summit Lodge</p>
+                <Link
+                    href="/"
+                    className="inline-block transition hover:opacity-80"
+                >
+                    <p className="font-display text-lg text-ink">
+                        Summit Lodge
+                    </p>
+                </Link>
                 <p className="mt-1 text-sm text-ink/50">Staff sign in</p>
 
                 {status && (
