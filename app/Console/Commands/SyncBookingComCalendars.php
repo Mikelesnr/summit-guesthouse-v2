@@ -43,7 +43,22 @@ class SyncBookingComCalendars extends Command
             throw new \RuntimeException("HTTP {$response->status()} fetching iCal feed");
         }
 
-        $events = $ics->parse($response->body());
+        $body = $response->body();
+
+        // A 200 that isn't actually a calendar (an HTML error page, say)
+        // would parse as "no reservations" and release every booking below.
+        // Treat it as a failed fetch instead.
+        if (! str_contains($body, 'BEGIN:VCALENDAR')) {
+            throw new \RuntimeException('Response was not an iCal feed');
+        }
+
+        // Skip anything we exported ourselves, in case Booking.com echoes our
+        // own "not available" blocks back in its feed.
+        $events = collect($ics->parse($body))
+            ->reject(fn(array $event) => $ics->isOwnEvent($event['uid']))
+            ->values()
+            ->all();
+
         $seenUids = collect($events)->pluck('uid');
 
         foreach ($events as $event) {
@@ -90,8 +105,8 @@ class SyncBookingComCalendars extends Command
                 BookingStatus::CHECKED_IN,
                 BookingStatus::CHECKED_OUT,
             ])
-            ->when($seenUids->isNotEmpty(), fn ($q) => $q->whereNotIn('source_uid', $seenUids))
-            ->when($seenUids->isEmpty(), fn ($q) => $q->whereNotNull('source_uid'))
+            ->when($seenUids->isNotEmpty(), fn($q) => $q->whereNotIn('source_uid', $seenUids))
+            ->when($seenUids->isEmpty(), fn($q) => $q->whereNotNull('source_uid'))
             ->update(['status' => BookingStatus::CANCELLED]);
     }
 }
