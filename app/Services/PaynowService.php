@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\Payment;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Paynow\Payments\Paynow;
 
 class PaynowService
@@ -15,8 +16,12 @@ class PaynowService
 
     public function __construct()
     {
-        $id = config('services.paynow.integration_id');
-        $key = config('services.paynow.integration_key');
+        // trim() guards against a trailing space/newline from copy-pasting
+        // these out of Paynow's dashboard — invisible in .env, but it
+        // silently breaks hash computation and produces an "Invalid Hash"
+        // error that looks like a credentials problem either way.
+        $id = trim((string) config('services.paynow.integration_id'));
+        $key = trim((string) config('services.paynow.integration_key'));
 
         $this->isSandbox = (bool) config('services.paynow.sandbox', false);
         $this->testEmail = config('services.paynow.test_email');
@@ -82,9 +87,26 @@ class PaynowService
             'raw_response'     => (array) $response,
         ]);
 
-        if ($response->success()) {
-            $payment->redirect_url = $response->redirectUrl();
+        if (! $response->success()) {
+            // This is the failure that was previously invisible: it never
+            // threw, so the controller returned a normal 200 with
+            // redirect_url missing, and the guest just saw nothing happen.
+            // The real reason Paynow gave lives in $response->errors() /
+            // the raw response — log it so it's actually diagnosable
+            // instead of only sitting silently in payments.raw_response.
+            Log::error('Paynow payment initiation failed', [
+                'payment_id' => $payment->id,
+                'booking_id' => $booking->id,
+                'sandbox' => $this->isSandbox,
+                'response' => (array) $response,
+            ]);
+
+            throw new \RuntimeException(
+                "We couldn't start the payment — please try again, or contact us on WhatsApp."
+            );
         }
+
+        $payment->redirect_url = $response->redirectUrl();
 
         return $payment;
     }

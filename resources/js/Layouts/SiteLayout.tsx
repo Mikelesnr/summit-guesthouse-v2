@@ -17,7 +17,13 @@ function isActive(url: string, href: string) {
 
 export default function SiteLayout({ children }: PropsWithChildren) {
     const { url } = usePage();
+    const { auth } = usePage().props as {
+        auth?: { user?: unknown };
+    };
     const [open, setOpen] = useState(false);
+
+    // Check if the user is logged in
+    const isLoggedIn = Boolean(auth?.user);
 
     return (
         <div className="flex min-h-screen flex-col bg-cream">
@@ -60,10 +66,10 @@ export default function SiteLayout({ children }: PropsWithChildren) {
 
                     <div className="hidden items-center gap-4 sm:flex">
                         <Link
-                            href="/login"
+                            href={isLoggedIn ? '/dashboard' : '/login'}
                             className="text-sm font-medium text-ink/50 transition hover:text-ink"
                         >
-                            Staff portal
+                            {isLoggedIn ? 'Dashboard' : 'Staff portal'}
                         </Link>
                         <Link href="/book" className="btn-primary">
                             Check availability
@@ -118,11 +124,11 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                             Check availability
                         </Link>
                         <Link
-                            href="/login"
+                            href={isLoggedIn ? '/dashboard' : '/login'}
                             onClick={() => setOpen(false)}
                             className="mt-3 text-center text-sm text-ink/50 hover:text-ink"
                         >
-                            Staff portal
+                            {isLoggedIn ? 'Dashboard' : 'Staff portal'}
                         </Link>
                     </nav>
                 </div>

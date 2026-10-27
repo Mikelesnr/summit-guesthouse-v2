@@ -33,10 +33,10 @@ class RoomSeeder extends Seeder
         $rooms = [
             [
                 'name' => 'Ministerial',
-                'type' => 'single',
+                'type' => 'double',
                 'price' => 50,
                 'size' => 250,
-                'max_guests' => 1,
+                'max_guests' => 2,
                 'quantity' => 5, // placeholder — set your real per-room-type counts here
                 'has_breakfast' => false,
                 'pets_allowed' => false,
@@ -63,10 +63,10 @@ class RoomSeeder extends Seeder
             ],
             [
                 'name' => 'Presidential',
-                'type' => 'single',
+                'type' => 'double',
                 'price' => 70,
                 'size' => 300,
-                'max_guests' => 1,
+                'max_guests' => 2,
                 'quantity' => 5, // placeholder — set your real per-room-type counts here
                 'has_breakfast' => false,
                 'pets_allowed' => false,
@@ -93,10 +93,10 @@ class RoomSeeder extends Seeder
             ],
             [
                 'name' => 'King',
-                'type' => 'single',
+                'type' => 'double',
                 'price' => 80,
                 'size' => 400,
-                'max_guests' => 1,
+                'max_guests' => 2,
                 'quantity' => 5, // placeholder — set your real per-room-type counts here
                 'has_breakfast' => false,
                 'pets_allowed' => false,

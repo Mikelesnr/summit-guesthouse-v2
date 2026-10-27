@@ -16,16 +16,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(PaynowService::class, function ($app) {
-            $config = config('services.paynow');
-
-            return new PaynowService(
-                $config['integration_id'],
-                $config['integration_key'],
-                $config['result_url'],
-                $config['return_url']
-            );
-        });
+        // PaynowService reads its own config internally (including
+        // per-request scheme/host resolution), so there's nothing to
+        // inject — this just makes that explicit instead of the previous
+        // binding, which passed 4 arguments the constructor doesn't
+        // accept and PHP was silently discarding.
+        $this->app->singleton(PaynowService::class);
     }
 
     /**
@@ -35,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        if (config('app.env') === 'production') {
+        if (str_starts_with(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
 
