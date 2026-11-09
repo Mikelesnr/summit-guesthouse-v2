@@ -1,12 +1,17 @@
 <?php
 
+use App\Enums\UserRole;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Dashboard\BookingManagementController;
 use App\Http\Controllers\Dashboard\DashboardIndexController;
+use App\Http\Controllers\Dashboard\ReviewModerationController;
 use App\Http\Controllers\Dashboard\RoomManagementController;
 use App\Http\Controllers\Dashboard\UserManagementController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaynowCallbackController;
+use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RoomIcalController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,8 +29,20 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 // unauthenticated, same as every other free iCal integration.
 Route::get('/ical/rooms/{room}.ics', [RoomIcalController::class, 'export'])->name('rooms.ical');
 
-// Staff dashboard — main overview at /dashboard
-Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
+// Where the stock Breeze pages send people ("route('dashboard')"): staff to
+// the dashboard, guests to their account page.
+Route::get('/portal', PortalController::class)->middleware('auth')->name('dashboard');
+
+// Guest accounts — a logged-in customer sees only this, never the dashboard.
+Route::middleware(['auth', 'role:guest'])->prefix('account')->name('account.')->group(function () {
+    Route::get('/', [AccountController::class, 'index'])->name('index');
+    Route::post('reviews', [ReviewController::class, 'store'])->middleware('throttle:5,60')->name('reviews.store');
+    Route::delete('reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+});
+
+// Staff dashboard — main overview at /dashboard. Staff roles only: now that
+// guests can sign up, being logged in is no longer enough to get in here.
+Route::middleware(['auth', 'role:'.implode(',', UserRole::staffRoles())])->prefix('dashboard')->name('dashboard.')->group(function () {
     // Overview tab landing page
     Route::get('/', DashboardIndexController::class)->name('index');
 
@@ -52,6 +69,10 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
 
     Route::put('bookings/{booking}/check-out-group', [BookingManagementController::class, 'checkOutGroup'])
         ->name('bookings.check-out-group');
+
+    // Review moderation — any staff member can approve or reject
+    Route::get('reviews', [ReviewModerationController::class, 'index'])->name('reviews.index');
+    Route::put('reviews/{review}', [ReviewModerationController::class, 'update'])->name('reviews.update');
 });
 
 // Browser redirect back from Paynow checkout

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Review;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,6 +17,11 @@ class PageController extends Controller
                 ->where('is_featured', true)
                 ->with('images')
                 ->get(),
+            // Only reviews a staff member has approved are ever public.
+            'reviews' => Review::approved()
+                ->latest()
+                ->take(6)
+                ->get(['id', 'author_name', 'rating', 'body', 'created_at']),
         ]);
     }
 

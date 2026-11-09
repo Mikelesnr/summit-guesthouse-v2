@@ -12,15 +12,14 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    // Public self-registration disabled: staff accounts are created by an
-    // owner/system_admin/manager, not self-signed-up (see UserRole::canManageUsers()).
-    // Route + RegisteredUserController + the Register.tsx page are all left
-    // in place (just commented out here), in case we want guest/regular
-    // customer self-registration in a future upgrade — uncomment below to
-    // bring it back rather than rebuilding it.
-    // Route::get('register', [RegisteredUserController::class, 'create'])
-    //     ->name('register');
-    // Route::post('register', [RegisteredUserController::class, 'store']);
+    // Guest self-registration. This only ever creates `guest` accounts
+    // (reviews, no dashboard access). Staff accounts are still created by an
+    // owner/system_admin/manager from the dashboard, never through this.
+    Route::get('register', [RegisteredUserController::class, 'create'])
+        ->name('register');
+
+    Route::post('register', [RegisteredUserController::class, 'store'])
+        ->middleware('throttle:6,1');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');

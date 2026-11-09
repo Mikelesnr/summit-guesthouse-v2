@@ -18,12 +18,17 @@ function isActive(url: string, href: string) {
 export default function SiteLayout({ children }: PropsWithChildren) {
     const { url } = usePage();
     const { auth } = usePage().props as {
-        auth?: { user?: unknown };
+        auth?: { user?: { role?: string } | null };
     };
     const [open, setOpen] = useState(false);
 
     // Check if the user is logged in
-    const isLoggedIn = Boolean(auth?.user);
+    const user = auth?.user ?? null;
+    const isLoggedIn = Boolean(user);
+    // Staff work from the dashboard; guests only have their own account page.
+    const isStaff = isLoggedIn && user?.role !== 'guest';
+    const accountHref = isStaff ? '/dashboard' : '/account';
+    const accountLabel = isStaff ? 'Dashboard' : 'My account';
 
     return (
         <div className="flex min-h-screen flex-col bg-cream">
@@ -65,12 +70,29 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                     </nav>
 
                     <div className="hidden items-center gap-4 sm:flex">
-                        <Link
-                            href={isLoggedIn ? '/dashboard' : '/login'}
-                            className="text-sm font-medium text-ink/50 transition hover:text-ink"
-                        >
-                            {isLoggedIn ? 'Dashboard' : 'Staff portal'}
-                        </Link>
+                        {isLoggedIn ? (
+                            <Link
+                                href={accountHref}
+                                className="text-sm font-medium text-ink/50 transition hover:text-ink"
+                            >
+                                {accountLabel}
+                            </Link>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="text-sm font-medium text-ink/50 transition hover:text-ink"
+                                >
+                                    Sign in
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="text-sm font-medium text-ink/50 transition hover:text-ink"
+                                >
+                                    Create account
+                                </Link>
+                            </>
+                        )}
                         <Link href="/book" className="btn-primary">
                             Check availability
                         </Link>
@@ -123,13 +145,32 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                         >
                             Check availability
                         </Link>
-                        <Link
-                            href={isLoggedIn ? '/dashboard' : '/login'}
-                            onClick={() => setOpen(false)}
-                            className="mt-3 text-center text-sm text-ink/50 hover:text-ink"
-                        >
-                            {isLoggedIn ? 'Dashboard' : 'Staff portal'}
-                        </Link>
+                        {isLoggedIn ? (
+                            <Link
+                                href={accountHref}
+                                onClick={() => setOpen(false)}
+                                className="mt-3 text-center text-sm text-ink/50 hover:text-ink"
+                            >
+                                {accountLabel}
+                            </Link>
+                        ) : (
+                            <div className="mt-3 flex justify-center gap-6 text-sm text-ink/50">
+                                <Link
+                                    href="/login"
+                                    onClick={() => setOpen(false)}
+                                    className="hover:text-ink"
+                                >
+                                    Sign in
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    onClick={() => setOpen(false)}
+                                    className="hover:text-ink"
+                                >
+                                    Create account
+                                </Link>
+                            </div>
+                        )}
                     </nav>
                 </div>
             </header>
@@ -210,6 +251,11 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                                     </Link>
                                 </li>
                             ))}
+                            <li>
+                                <Link href="/login" className="hover:text-ink">
+                                    Staff portal
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                 </div>

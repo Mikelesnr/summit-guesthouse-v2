@@ -9,6 +9,7 @@ interface UsersIndexProps {
 }
 
 const ROLE_LABEL: Record<UserRole, string> = {
+    guest: 'Guest',
     staff: 'Staff',
     manager: 'Manager',
     owner: 'Owner',

@@ -1,6 +1,6 @@
 import { Config } from 'ziggy-js';
 
-export type UserRole = 'staff' | 'manager' | 'owner' | 'system_admin';
+export type UserRole = 'guest' | 'staff' | 'manager' | 'owner' | 'system_admin';
 
 export interface User {
     id: string;
@@ -91,6 +91,17 @@ export interface ChatMessage {
     content: string;
 }
 
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Review {
+    id: string;
+    author_name: string;
+    rating: number;
+    body: string;
+    status: ReviewStatus;
+    created_at: string;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;
@@ -117,5 +128,7 @@ export type PageProps<
     flash: {
         success?: string | null;
     };
+    /** Reviews waiting for approval. Staff only, null for everyone else. */
+    pendingReviews?: number | null;
     ziggy: Config & { location: string };
 };

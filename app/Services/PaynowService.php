@@ -13,6 +13,12 @@ class PaynowService
     private Paynow $paynow;
     private bool $isSandbox;
     private ?string $testEmail;
+    private string $integrationId;
+    private string $keyHint;
+    private int $keyLength;
+
+    /** Paynow statuses meaning a checkout can no longer be completed. */
+    private const DEAD_STATUSES = ['cancelled', 'failed', 'error'];
 
     public function __construct()
     {
@@ -22,6 +28,12 @@ class PaynowService
         // error that looks like a credentials problem either way.
         $id = trim((string) config('services.paynow.integration_id'));
         $key = trim((string) config('services.paynow.integration_key'));
+
+        $this->integrationId = $id;
+        // Only the last four characters: enough to eyeball against Paynow's
+        // dashboard, not enough to leak the key into a log file.
+        $this->keyHint = $key === '' ? '(empty)' : substr($key, -4);
+        $this->keyLength = strlen($key);
 
         $this->isSandbox = (bool) config('services.paynow.sandbox', false);
         $this->testEmail = config('services.paynow.test_email');
@@ -55,8 +67,10 @@ class PaynowService
         ]);
 
         // 4. Set callback and return routes using named routes (resolves against active request domain)
-        $this->paynow->setResultUrl(route('paynow.callback', ['payment' => $payment->id]));
-        $this->paynow->setReturnUrl(route('paynow.return', ['payment' => $payment->id]));
+        $resultUrl = route('paynow.callback', ['payment' => $payment->id]);
+        $returnUrl = route('paynow.return', ['payment' => $payment->id]);
+        $this->paynow->setResultUrl($resultUrl);
+        $this->paynow->setReturnUrl($returnUrl);
 
         // Check sandbox mode cleanly via class properties
         $authEmail = ($this->isSandbox && $this->testEmail)
@@ -78,11 +92,28 @@ class PaynowService
             );
         }
 
+        // What we are actually sending, so it can be compared with .env and
+        // with the integration shown on Paynow's dashboard.
+        Log::info('Paynow initiating payment', [
+            'payment_id' => $payment->id,
+            'reference' => $payment->reference,
+            'amount' => $totalGroupAmount,
+            'integration_id' => $this->integrationId,
+            'integration_key_ends_with' => $this->keyHint,
+            'integration_key_length' => $this->keyLength,
+            'sandbox' => $this->isSandbox,
+            'auth_email' => $authEmail,
+            'result_url' => $resultUrl,
+            'return_url' => $returnUrl,
+        ]);
+
         $response = $this->paynow->send($paynowPayment);
 
         $payment->update([
             'paynow_reference' => $response->pollUrl() ? $this->extractReference($response->pollUrl()) : null,
             'poll_url'         => $response->pollUrl(),
+            // Stored so a retried booking can be handed the same checkout.
+            'redirect_url'     => $response->success() ? $response->redirectUrl() : null,
             'status'           => $response->success() ? 'created' : 'failed',
             'raw_response'     => (array) $response,
         ]);
@@ -97,6 +128,8 @@ class PaynowService
             Log::error('Paynow payment initiation failed', [
                 'payment_id' => $payment->id,
                 'booking_id' => $booking->id,
+                'integration_id' => $this->integrationId,
+                'auth_email' => $authEmail,
                 'sandbox' => $this->isSandbox,
                 'response' => (array) $response,
             ]);
@@ -106,9 +139,55 @@ class PaynowService
             );
         }
 
-        $payment->redirect_url = $response->redirectUrl();
-
         return $payment;
+    }
+
+    /**
+     * Gives the caller a checkout for this booking group without ever
+     * starting a second payment for the same booking: a finished payment is
+     * reported as paid, an unfinished one is handed back as it was, and only
+     * if there is nothing usable (no attempt yet, or the last one failed or
+     * was cancelled) is a new attempt started. This is what makes a retried
+     * booking request safe.
+     *
+     * @return array{paid: bool, redirect_url: ?string}
+     */
+    public function startOrResume(Booking $primary): array
+    {
+        $bookingIds = $primary->group_reference
+            ? Booking::where('group_reference', $primary->group_reference)->pluck('id')
+            : collect([$primary->id]);
+
+        $payment = Payment::whereIn('booking_id', $bookingIds)
+            ->latest()
+            ->orderByDesc('id')
+            ->first();
+
+        if ($payment) {
+            try {
+                // Asks Paynow what happened (and records it). A guest whose
+                // connection dropped may well have paid in the meantime.
+                $this->checkStatus($payment);
+            } catch (\Throwable $e) {
+                // Paynow unreachable right now: we cannot tell, so fall back
+                // on what we have stored rather than failing the guest.
+                report($e);
+            }
+
+            $payment->refresh();
+
+            if ($payment->status === 'paid') {
+                return ['paid' => true, 'redirect_url' => null];
+            }
+
+            if ($payment->redirect_url && ! in_array($payment->status, self::DEAD_STATUSES, true)) {
+                return ['paid' => false, 'redirect_url' => $payment->redirect_url];
+            }
+        }
+
+        $payment = $this->initiate($primary);
+
+        return ['paid' => false, 'redirect_url' => $payment->redirect_url];
     }
 
     public function checkStatus(Payment $payment): string

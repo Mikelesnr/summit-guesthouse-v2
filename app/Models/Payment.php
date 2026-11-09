@@ -14,6 +14,7 @@ class Payment extends Model
         'reference',
         'paynow_reference',
         'poll_url',
+        'redirect_url',
         'amount',
         'status',
         'raw_response',

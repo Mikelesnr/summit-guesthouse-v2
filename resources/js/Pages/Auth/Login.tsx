@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 className="pointer-events-none absolute -right-32 -top-20 h-[420px] w-[600px] text-gold"
                 opacity={0.2}
             />
-            <Head title="Staff login — Summit Lodge" />
+            <Head title="Sign in — Summit Lodge" />
 
             <div className="w-full max-w-sm rounded-2xl border border-cream/10 bg-cream p-8 shadow-lift">
                 <Link
@@ -36,7 +36,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         Summit Lodge
                     </p>
                 </Link>
-                <p className="mt-1 text-sm text-ink/50">Staff sign in</p>
+                <p className="mt-1 text-sm text-ink/50">
+                    Sign in to your account
+                </p>
 
                 {status && (
                     <p className="mt-4 text-sm text-green-700">{status}</p>
@@ -115,6 +117,16 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             Forgot your password?
                         </Link>
                     )}
+
+                    <p className="border-t border-line pt-4 text-center text-xs text-ink/50">
+                        New here?{' '}
+                        <Link
+                            href={route('register')}
+                            className="font-medium text-ink hover:text-gold-dark"
+                        >
+                            Create a guest account
+                        </Link>
+                    </p>
                 </form>
             </div>
         </div>

@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasUuids;
@@ -56,6 +56,24 @@ class User extends Authenticatable
     public function canManageRooms(): bool
     {
         return in_array($this->role->value, UserRole::canManageRooms(), true);
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === UserRole::Guest;
+    }
+
+    /** Works at the guesthouse (any non-guest role). */
+    public function isStaff(): bool
+    {
+        // role can be unset on a model that has not been read back from the
+        // database yet (e.g. a freshly built test user), so do not assume it.
+        return in_array($this->role?->value, UserRole::staffRoles(), true);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 
     public function canManageUsers(): bool
