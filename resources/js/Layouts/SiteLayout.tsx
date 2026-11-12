@@ -71,12 +71,22 @@ export default function SiteLayout({ children }: PropsWithChildren) {
 
                     <div className="hidden items-center gap-4 sm:flex">
                         {isLoggedIn ? (
-                            <Link
-                                href={accountHref}
-                                className="text-sm font-medium text-ink/50 transition hover:text-ink"
-                            >
-                                {accountLabel}
-                            </Link>
+                            <>
+                                <Link
+                                    href={accountHref}
+                                    className="text-sm font-medium text-ink/50 transition hover:text-ink"
+                                >
+                                    {accountLabel}
+                                </Link>
+                                <Link
+                                    href="/logout"
+                                    method="post"
+                                    as="button"
+                                    className="text-sm font-medium text-ink/50 transition hover:text-ink"
+                                >
+                                    Sign out
+                                </Link>
+                            </>
                         ) : (
                             <>
                                 <Link
@@ -146,13 +156,24 @@ export default function SiteLayout({ children }: PropsWithChildren) {
                             Check availability
                         </Link>
                         {isLoggedIn ? (
-                            <Link
-                                href={accountHref}
-                                onClick={() => setOpen(false)}
-                                className="mt-3 text-center text-sm text-ink/50 hover:text-ink"
-                            >
-                                {accountLabel}
-                            </Link>
+                            <div className="mt-3 flex justify-center gap-6 text-sm text-ink/50">
+                                <Link
+                                    href={accountHref}
+                                    onClick={() => setOpen(false)}
+                                    className="hover:text-ink"
+                                >
+                                    {accountLabel}
+                                </Link>
+                                <Link
+                                    href="/logout"
+                                    method="post"
+                                    as="button"
+                                    onClick={() => setOpen(false)}
+                                    className="hover:text-ink"
+                                >
+                                    Sign out
+                                </Link>
+                            </div>
                         ) : (
                             <div className="mt-3 flex justify-center gap-6 text-sm text-ink/50">
                                 <Link

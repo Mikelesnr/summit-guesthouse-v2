@@ -4,7 +4,7 @@ import SiteLayout from '@/Layouts/SiteLayout';
 import BookingDetailsForm from '@/Pages/Booking/Partials/BookingDetailsForm';
 import { AvailabilitySearch, Room } from '@/types';
 import { Head } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Step = 'search' | 'results' | 'details';
 
@@ -19,7 +19,8 @@ export default function Search({ initialSearch = null }: SearchProps) {
             ? {
                   check_in: initialSearch.check_in,
                   check_out: initialSearch.check_out,
-                  party_size: initialSearch.party_size ?? 1,
+                  // Query-string values arrive as text, e.g. "4".
+                  party_size: Number(initialSearch.party_size) || 1,
               }
             : null,
     );
@@ -59,6 +60,25 @@ export default function Search({ initialSearch = null }: SearchProps) {
     );
     const suggestedRooms = search ? Math.ceil(search.party_size / 2) : 0;
 
+    // What to pre-fill the form with. Kept separate from `search` so a guest
+    // count sent without dates (or the reverse) is still carried over.
+    const prefill: Partial<AvailabilitySearch> = {
+        check_in: initialSearch?.check_in,
+        check_out: initialSearch?.check_out,
+        party_size: Number(initialSearch?.party_size) || undefined,
+    };
+
+    // Coming from the homepage (or a shared link) with dates already chosen:
+    // run the search straight away instead of leaving an empty page.
+    const autoSearched = useRef(false);
+    useEffect(() => {
+        if (autoSearched.current || !search) return;
+        autoSearched.current = true;
+        void runSearch(search);
+        // Only once, on arrival.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     async function runSearch(params: AvailabilitySearch) {
         setLoading(true);
         setError(null);
@@ -70,14 +90,30 @@ export default function Search({ initialSearch = null }: SearchProps) {
                 check_in: params.check_in,
                 check_out: params.check_out,
             }).toString();
-            const res = await fetch(`/api/rooms/available?${qs}`);
-            if (!res.ok) throw new Error('Search failed');
+            const res = await fetch(`/api/rooms/available?${qs}`, {
+                headers: { Accept: 'application/json' },
+            });
+            if (!res.ok) {
+                // Say what the server actually objected to (for example a
+                // date in the past) rather than a vague failure.
+                const body = await res.json().catch(() => null);
+                const first = body?.errors
+                    ? (Object.values(body.errors).flat()[0] as unknown)
+                    : body?.message;
+                throw new Error(
+                    typeof first === 'string' ? first : 'Search failed',
+                );
+            }
             const data: { rooms: Room[] } = await res.json();
             setRooms(data.rooms);
             setStep('results');
-        } catch {
+        } catch (err) {
             setError(
-                "Couldn't check availability — please try again, or message us on WhatsApp.",
+                err instanceof TypeError
+                    ? "We couldn't reach the server. Check your connection and try again."
+                    : err instanceof Error && err.message !== 'Search failed'
+                      ? err.message
+                      : "Couldn't check availability — please try again, or message us on WhatsApp.",
             );
         } finally {
             setLoading(false);
@@ -107,7 +143,7 @@ export default function Search({ initialSearch = null }: SearchProps) {
                     <AvailabilitySearchForm
                         onSearch={runSearch}
                         loading={loading}
-                        initial={search ?? {}}
+                        initial={search ?? prefill}
                     />
                 </div>
 
