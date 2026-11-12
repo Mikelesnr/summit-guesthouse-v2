@@ -33,7 +33,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard.index', absolute: false));
+        // Staff go to the dashboard (or wherever they were headed). Guests
+        // always land on their own account page: an "intended" dashboard
+        // URL would only bounce them to a 403.
+        if ($request->user()->isStaff()) {
+            return redirect()->intended(route('dashboard.index', absolute: false));
+        }
+
+        return redirect(route('account.index', absolute: false));
     }
 
     /**

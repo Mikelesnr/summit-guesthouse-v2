@@ -1,8 +1,9 @@
 import AvailabilitySearchForm from '@/Components/AvailabilitySearchForm';
 import ContourLines from '@/Components/ContourLines';
+import Stars from '@/Components/Reviews/Stars';
 import RoomCard from '@/Components/RoomCard';
 import SiteLayout from '@/Layouts/SiteLayout';
-import { AvailabilitySearch, Room } from '@/types';
+import { AvailabilitySearch, Review, Room } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Coffee, Fan, Satellite, Wifi } from 'lucide-react';
 
@@ -65,9 +66,14 @@ const TESTIMONIALS = [
 
 interface WelcomeProps {
     featuredRooms: Room[];
+    /** Reviews a staff member has approved. May be empty. */
+    reviews?: Pick<Review, 'id' | 'author_name' | 'rating' | 'body'>[];
 }
 
-export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
+export default function Welcome({
+    featuredRooms = [],
+    reviews = [],
+}: WelcomeProps) {
     function goToBooking(search: AvailabilitySearch) {
         router.get('/book', { ...search });
     }
@@ -248,6 +254,30 @@ export default function Welcome({ featuredRooms = [] }: WelcomeProps) {
                             </div>
                         ))}
                     </div>
+
+                    {reviews.length > 0 && (
+                        <>
+                            <h3 className="mt-16 text-center font-display text-xl text-ink">
+                                Recent reviews
+                            </h3>
+                            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                {reviews.map((review) => (
+                                    <div
+                                        key={review.id}
+                                        className="rounded-2xl border border-line bg-white p-6 shadow-card"
+                                    >
+                                        <Stars rating={review.rating} />
+                                        <p className="mt-3 whitespace-pre-line text-sm text-ink/70">
+                                            {review.body}
+                                        </p>
+                                        <p className="mt-4 font-display text-sm text-ink">
+                                            {review.author_name}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
             </section>
         </SiteLayout>

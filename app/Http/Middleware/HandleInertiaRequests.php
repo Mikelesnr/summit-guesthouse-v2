@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\ReviewStatus;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -42,6 +44,11 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
             ],
+            // Badge on the dashboard's Reviews link, so new reviews waiting
+            // for approval do not go unnoticed. Staff only.
+            'pendingReviews' => fn () => $request->user()?->isStaff()
+                ? Review::where('status', ReviewStatus::PENDING->value)->count()
+                : null,
         ];
     }
 }

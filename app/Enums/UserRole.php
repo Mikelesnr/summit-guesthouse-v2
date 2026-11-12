@@ -4,6 +4,9 @@ namespace App\Enums;
 
 enum UserRole: string
 {
+    // A customer with a website account. Can leave reviews, never sees the
+    // staff dashboard.
+    case Guest = 'guest';
     case Staff = 'staff';
     case Manager = 'manager';
     case Owner = 'owner';
@@ -12,11 +15,18 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
+            self::Guest => 'Guest',
             self::Staff => 'Staff',
             self::Manager => 'Manager',
             self::Owner => 'Owner',
             self::SystemAdmin => 'System Admin',
         };
+    }
+
+    /** Everyone who works at the guesthouse and may use the staff dashboard. */
+    public static function staffRoles(): array
+    {
+        return [self::Staff->value, self::Manager->value, self::Owner->value, self::SystemAdmin->value];
     }
 
     /** Roles allowed to view overall financial revenue metrics. */
@@ -45,6 +55,7 @@ enum UserRole: string
     public function rank(): int
     {
         return match ($this) {
+            self::Guest => -1,
             self::Staff => 0,
             self::Manager => 1,
             self::Owner => 2,
@@ -65,7 +76,9 @@ enum UserRole: string
     {
         return array_values(array_map(
             fn(self $role) => $role->value,
-            array_filter(self::cases(), fn(self $role) => $role->rank() <= $viewer->rank())
+            // Guests are website customers, not team members, so they never
+            // appear in (or get assigned from) the staff user list.
+            array_filter(self::cases(), fn(self $role) => $role !== self::Guest && $role->rank() <= $viewer->rank())
         ));
     }
 }

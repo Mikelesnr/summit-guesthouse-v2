@@ -3,7 +3,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
 
 export default function DashboardLayout({ children }: PropsWithChildren) {
-    const { auth, flash } = usePage<PageProps>().props;
+    const { auth, flash, pendingReviews } = usePage<PageProps>().props;
     const canManageRooms = ['manager', 'owner', 'system_admin'].includes(
         auth.user.role,
     );
@@ -22,6 +22,12 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                     <nav className="mt-8 space-y-1 text-sm">
                         <NavItem href="/dashboard">Overview</NavItem>
                         <NavItem href="/dashboard/bookings">Bookings</NavItem>
+                        <NavItem
+                            href="/dashboard/reviews"
+                            badge={pendingReviews}
+                        >
+                            Reviews
+                        </NavItem>
                         {canManageRooms && (
                             <NavItem href="/dashboard/rooms">Rooms</NavItem>
                         )}
@@ -51,7 +57,11 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
     );
 }
 
-function NavItem({ href, children }: PropsWithChildren<{ href: string }>) {
+function NavItem({
+    href,
+    children,
+    badge,
+}: PropsWithChildren<{ href: string; badge?: number | null }>) {
     const { url } = usePage();
     const active =
         url.startsWith(href) && (href !== '/dashboard' || url === '/dashboard');
@@ -63,7 +73,14 @@ function NavItem({ href, children }: PropsWithChildren<{ href: string }>) {
                 active ? 'bg-ink text-cream' : 'text-ink/70 hover:bg-cream-deep'
             }`}
         >
-            {children}
+            <span className="flex items-center justify-between">
+                {children}
+                {badge ? (
+                    <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-semibold text-ink">
+                        {badge}
+                    </span>
+                ) : null}
+            </span>
         </Link>
     );
 }
